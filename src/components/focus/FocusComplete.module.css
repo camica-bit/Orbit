@@ -1,0 +1,105 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  width: 100%;
+  max-width: 560px;
+  animation: fade-in 0.5s ease-out;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Celebration ring + check */
+.celebration {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.goldRing {
+  position: absolute;
+  inset: -12px;
+  border-radius: 50%;
+  border: 3px solid var(--orbit-gold);
+  box-shadow: 0 0 24px rgba(255, 215, 0, 0.4);
+}
+
+.checkMark {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background-color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 40px rgba(200, 198, 197, 0.3);
+}
+
+.textBlock { text-align: center; }
+
+.headline {
+  color: var(--orbit-gold);
+  margin-bottom: 8px;
+  filter: drop-shadow(0 2px 8px rgba(255,215,0,0.3));
+}
+
+.taskTitle {
+  color: var(--on-surface-variant);
+}
+
+/* Stats row */
+.stats {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+.stat {
+  flex: 1;
+  background-color: var(--surface-container);
+  padding: 20px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.statNum {
+  color: var(--on-surface);
+  font-variant-numeric: tabular-nums;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.statLabel {
+  color: var(--on-surface-variant);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.exitBtn {
+  flex: 1;
+  padding: 16px;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+}
+
+.restartBtn {
+  padding: 16px 24px;
+  font-size: 13px;
+}

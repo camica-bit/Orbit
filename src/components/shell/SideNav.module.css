@@ -1,0 +1,130 @@
+.sidenav {
+  display: none;
+  position: fixed;
+  left: 0; top: 0;
+  width: var(--sidenav-width);
+  height: 100dvh;
+  background-color: var(--surface-container-low);
+  border-right: 2px solid var(--surface-variant);
+  border-right-color: var(--outline-variant);
+  flex-direction: column;
+  padding: 28px 20px;
+  z-index: 40;
+  overflow-y: auto;
+}
+
+@media (min-width: 768px) {
+  .sidenav { display: flex; }
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+.logoMark {
+  width: 48px;
+  height: 48px;
+  background-color: var(--secondary-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.logoText {
+  color: var(--on-surface);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.logoSub {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--on-surface-variant);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* Nav list */
+.navList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  color: var(--on-surface-variant);
+  border-left: 3px solid transparent;
+  transition: all 0.15s ease;
+  text-decoration: none;
+  font-size: var(--text-label-mono);
+  letter-spacing: var(--ls-label-mono);
+  font-weight: 500;
+  border-radius: 0;
+}
+
+.navItem:hover {
+  color: var(--on-surface);
+  background-color: var(--surface-container-high);
+  transform: translateX(2px);
+}
+
+.navItemActive {
+  color: var(--on-secondary-container);
+  background-color: var(--secondary-container);
+  border-left-color: var(--primary);
+}
+.navItemActive:hover {
+  transform: none;
+  background-color: var(--secondary-container);
+}
+
+/* Footer */
+.footer {
+  margin-top: auto;
+  padding-top: 16px;
+}
+
+.syncBtn {
+  width: 100%;
+  margin-bottom: 12px;
+  font-size: var(--text-label-mono);
+  letter-spacing: 0.1em;
+  padding: 10px 16px;
+}
+
+.footerLinks {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 4px;
+  margin-top: 8px;
+}
+
+.footerLink {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--on-surface-variant);
+  font-size: var(--text-label-mono);
+  letter-spacing: var(--ls-label-mono);
+  padding: 6px 8px;
+  transition: color 0.15s;
+  cursor: pointer;
+  background: none;
+  border: none;
+}
+.footerLink:hover { color: var(--on-surface); }
+
+.footerLinkDanger:hover { color: var(--error); }

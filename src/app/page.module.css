@@ -1,0 +1,72 @@
+.page {
+  padding: var(--margin-mobile);
+  padding-bottom: 120px;
+  max-width: var(--container-max);
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+@media (min-width: 768px) {
+  .page {
+    padding: var(--margin-desktop);
+    padding-bottom: 120px;
+  }
+}
+
+/* Greeting */
+.greeting {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+@media (min-width: 768px) {
+  .greeting {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+}
+
+.greetingTitle {
+  color: var(--on-background);
+  letter-spacing: -0.01em;
+  margin-bottom: 8px;
+}
+
+.greetingSubrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.greetingSub {
+  color: var(--primary);
+}
+
+.sysDate {
+  color: var(--outline);
+  font-size: var(--text-label-mono);
+  letter-spacing: 0.06em;
+  text-align: right;
+  line-height: 1.6;
+}
+
+/* Done state */
+.done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  min-height: 60vh;
+  padding: var(--margin-mobile);
+}
+
+.doneTitle {
+  color: var(--on-surface);
+  text-align: center;
+}

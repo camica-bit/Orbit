@@ -1,0 +1,49 @@
+.container {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid var(--secondary);
+  opacity: 0.15;
+  transition: opacity 0.4s;
+}
+.ring.ringActive { opacity: 0.35; }
+
+.ringOuter  { inset: 0;    animation: ring-pulse 4s linear infinite; }
+.ringMid    { inset: 22px; animation: ring-pulse 3s linear infinite reverse; }
+.ringInner  { inset: 44px; animation: ring-pulse 2s linear infinite; }
+
+@keyframes ring-pulse {
+  0%,100% { transform: scale(0.95); opacity: 0.15; }
+  50%      { transform: scale(1.04); opacity: 0.45; }
+}
+
+.ringActive.ringOuter  { animation-duration: 1.5s; }
+.ringActive.ringMid    { animation-duration: 1.2s; }
+.ringActive.ringInner  { animation-duration: 0.9s; }
+
+.core {
+  position: relative;
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  background-color: var(--secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  box-shadow: 0 0 32px rgba(200, 200, 176, 0.25);
+  transition: box-shadow 0.3s, transform 0.05s ease;
+}
+
+.coreActive {
+  box-shadow: 0 0 48px rgba(200, 200, 176, 0.5);
+}

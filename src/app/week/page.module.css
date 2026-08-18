@@ -1,0 +1,138 @@
+.page {
+  padding: var(--margin-mobile);
+  padding-bottom: 120px;
+  max-width: var(--container-max);
+  margin: 0 auto;
+}
+@media (min-width: 768px) {
+  .page { padding: var(--margin-desktop); padding-bottom: 120px; }
+}
+
+.header { margin-bottom: 36px; }
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.title { color: var(--primary); }
+
+.subtitle {
+  color: var(--on-surface-variant);
+  max-width: 560px;
+}
+
+/* Week grid */
+.weekGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-bottom: 40px;
+}
+
+@media (max-width: 640px) {
+  .weekGrid { grid-template-columns: repeat(4, 1fr); }
+}
+
+.dayCard {
+  background-color: var(--surface-container);
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-height: 160px;
+  transition: background-color 0.15s;
+}
+.dayCard:hover { background-color: var(--surface-container-high); }
+
+.dayCardToday {
+  background-color: var(--secondary-container);
+  border-top-color: var(--secondary);
+  border-left-color: var(--secondary);
+}
+
+.dayLabel {
+  font-size: var(--text-label-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.todayBadge {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--on-secondary);
+  background-color: var(--secondary);
+  padding: 1px 5px;
+}
+
+.barWrap {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  min-height: 60px;
+}
+
+.bar {
+  width: 8px;
+  min-height: 4px;
+  transition: height 0.3s ease;
+}
+
+.dayStats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.statNum {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 9px;
+  color: var(--on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.statHours {
+  font-size: 9px;
+  color: var(--outline);
+  letter-spacing: 0.06em;
+}
+
+.restDay {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--outline);
+  opacity: 0.5;
+}
+
+/* Coming soon */
+.comingSoon {
+  background-color: var(--surface-container);
+  padding: 20px 24px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.csTitle {
+  color: var(--secondary);
+  font-size: var(--text-label-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.csSub {
+  color: var(--on-surface-variant);
+  font-size: 14px;
+}

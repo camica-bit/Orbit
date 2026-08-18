@@ -1,0 +1,281 @@
+/* ============================================================
+   ORBIT — Pixel Effects
+   Beveled borders, dithering patterns, tactile UI effects
+   ============================================================ */
+
+/* ---- Pixel Border (Beveled 3D card) ---- */
+.pixel-border {
+  border-width: 2px;
+  border-style: solid;
+  border-top-color: var(--outline-variant);
+  border-left-color: var(--outline-variant);
+  border-bottom-color: var(--surface-container-high);
+  border-right-color: var(--surface-container-high);
+}
+
+.pixel-border-raised {
+  border-width: 2px;
+  border-style: solid;
+  border-top-color: rgba(255,255,255,0.12);
+  border-left-color: rgba(255,255,255,0.12);
+  border-bottom-color: rgba(0,0,0,0.5);
+  border-right-color: rgba(0,0,0,0.5);
+  box-shadow:
+    inset 1px 1px 0px rgba(255,255,255,0.06),
+    inset -1px -1px 0px rgba(0,0,0,0.3);
+}
+
+.pixel-border-interactive {
+  border-width: 2px;
+  border-style: solid;
+  border-top-color: var(--primary);
+  border-left-color: var(--primary);
+  border-bottom-color: var(--surface-container-lowest);
+  border-right-color: var(--surface-container-lowest);
+  transition: all 0.08s ease;
+}
+.pixel-border-interactive:active {
+  border-top-color: var(--surface-container-lowest);
+  border-left-color: var(--surface-container-lowest);
+  border-bottom-color: var(--primary);
+  border-right-color: var(--primary);
+  transform: translate(2px, 2px);
+}
+
+/* ---- Dithered Divider (horizontal) ---- */
+.pixel-divider-h {
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--surface-variant)  0px,
+    var(--surface-variant)  2px,
+    transparent             2px,
+    transparent             4px
+  );
+}
+
+/* ---- Dithered Divider (vertical) ---- */
+.pixel-divider-v {
+  width: 2px;
+  background: repeating-linear-gradient(
+    180deg,
+    var(--surface-variant)  0px,
+    var(--surface-variant)  2px,
+    transparent             2px,
+    transparent             4px
+  );
+}
+
+/* ---- Dithered Shadow (element depth) ---- */
+.dither-shadow {
+  position: relative;
+}
+.dither-shadow::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: -4px;
+  bottom: -4px;
+  background-image: radial-gradient(var(--surface-container-lowest) 20%, transparent 20%);
+  background-size: 4px 4px;
+  z-index: -1;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* ---- Pixel Button (Base) ---- */
+.pixel-btn {
+  position: relative;
+  background-color: var(--surface-container-high);
+  border-width: 2px;
+  border-style: solid;
+  border-top-color: var(--outline-variant);
+  border-left-color: var(--outline-variant);
+  border-bottom-color: var(--surface-container-lowest);
+  border-right-color: var(--surface-container-lowest);
+  color: var(--on-surface);
+  font-family: var(--font-mono);
+  font-size: var(--text-label-mono);
+  letter-spacing: var(--ls-label-mono);
+  font-weight: 500;
+  text-transform: uppercase;
+  transition: all 0.08s ease;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 24px;
+  user-select: none;
+}
+.pixel-btn:hover {
+  background-color: var(--surface-container-highest);
+}
+.pixel-btn:active {
+  border-top-color: var(--surface-container-lowest);
+  border-left-color: var(--surface-container-lowest);
+  border-bottom-color: var(--outline-variant);
+  border-right-color: var(--outline-variant);
+  transform: translate(1px, 1px);
+}
+
+/* ---- Pixel Button Primary ---- */
+.pixel-btn-primary {
+  background-color: var(--primary);
+  color: var(--on-primary-fixed);
+  border-top-color: rgba(255,255,255,0.4);
+  border-left-color: rgba(255,255,255,0.4);
+  border-bottom-color: var(--on-primary-container);
+  border-right-color: var(--on-primary-container);
+}
+.pixel-btn-primary:hover {
+  background-color: var(--primary-fixed);
+}
+.pixel-btn-primary:active {
+  border-top-color: var(--on-primary-container);
+  border-left-color: var(--on-primary-container);
+  border-bottom-color: rgba(255,255,255,0.4);
+  border-right-color: rgba(255,255,255,0.4);
+}
+
+/* ---- Pixel Button Secondary ---- */
+.pixel-btn-secondary {
+  background-color: var(--secondary);
+  color: var(--on-secondary);
+  border-top-color: rgba(255,255,255,0.3);
+  border-left-color: rgba(255,255,255,0.3);
+  border-bottom-color: rgba(0,0,0,0.3);
+  border-right-color: rgba(0,0,0,0.3);
+}
+.pixel-btn-secondary:hover {
+  background-color: var(--secondary-fixed);
+}
+
+/* ---- Terminal Input (inset) ---- */
+.terminal-input {
+  background-color: var(--surface-container-lowest);
+  border-width: 2px;
+  border-style: solid;
+  border-color: var(--surface-variant);
+  border-bottom-color: var(--on-surface);
+  color: var(--on-surface);
+  font-family: var(--font-mono);
+  font-size: var(--text-label-mono);
+  letter-spacing: var(--ls-label-mono);
+  font-weight: 500;
+  box-shadow:
+    inset 2px 2px 0px rgba(0,0,0,0.8),
+    inset -1px -1px 0px rgba(255,255,255,0.03);
+  outline: none;
+  width: 100%;
+}
+.terminal-input:focus {
+  border-color: var(--primary);
+}
+.terminal-input::placeholder {
+  color: var(--outline);
+  font-style: italic;
+}
+
+/* ---- Noise Texture Overlay ---- */
+.noise-overlay {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  opacity: 0.3;
+  mix-blend-mode: overlay;
+}
+
+/* ---- Corner Accent Brackets ---- */
+.corner-brackets {
+  position: relative;
+}
+.corner-brackets::before,
+.corner-brackets::after {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-color: var(--primary);
+  border-style: solid;
+}
+.corner-brackets::before {
+  top: 0; left: 0;
+  border-width: 2px 0 0 2px;
+}
+.corner-brackets::after {
+  bottom: 0; right: 0;
+  border-width: 0 2px 2px 0;
+}
+
+/* ---- Checkerboard dither pattern ---- */
+.dither-bg {
+  background-image:
+    repeating-linear-gradient(45deg, var(--surface-container-low) 25%, transparent 25%, transparent 75%, var(--surface-container-low) 75%, var(--surface-container-low)),
+    repeating-linear-gradient(45deg, var(--surface-container-low) 25%, var(--background) 25%, var(--background) 75%, var(--surface-container-low) 75%, var(--surface-container-low));
+  background-position: 0 0, 2px 2px;
+  background-size: 4px 4px;
+}
+
+/* ---- Scan-line overlay ---- */
+.scanline-overlay {
+  position: relative;
+  overflow: hidden;
+}
+.scanline-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0px,
+    transparent 3px,
+    rgba(0,0,0,0.04) 3px,
+    rgba(0,0,0,0.04) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ---- Status Chips ---- */
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  font-weight: 600;
+  text-transform: uppercase;
+  border-width: 1px;
+  border-style: solid;
+}
+.status-chip-fixed {
+  background-color: var(--primary);
+  color: var(--on-primary-fixed);
+  border-color: transparent;
+}
+.status-chip-flex {
+  background-color: transparent;
+  color: var(--secondary);
+  border-color: var(--secondary);
+  border-style: dashed;
+}
+.status-chip-info {
+  background-color: transparent;
+  color: var(--outline);
+  border-color: var(--outline);
+}
+.status-chip-error {
+  background-color: var(--error-container);
+  color: var(--on-error-container);
+  border-color: transparent;
+}
+.status-chip-category {
+  background-color: var(--secondary-container);
+  color: var(--secondary);
+  border-color: transparent;
+}

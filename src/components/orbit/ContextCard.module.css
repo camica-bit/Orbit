@@ -1,0 +1,58 @@
+.card {
+  background-color: var(--surface-container);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 160px;
+  transition: background-color 0.15s;
+  position: relative;
+}
+.card:hover { background-color: var(--surface-container-highest); }
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.chip {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  padding: 3px 8px;
+  text-transform: uppercase;
+}
+
+.editBtn {
+  color: var(--on-surface-variant);
+  opacity: 0;
+  transition: opacity 0.15s;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+}
+.card:hover .editBtn { opacity: 1; }
+
+.content {
+  color: var(--on-background);
+  flex: 1;
+  line-height: 1.5;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 14px;
+}
+
+.tag {
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  padding: 2px 6px;
+  background-color: var(--surface-variant);
+  color: var(--on-surface);
+  border: 1px solid var(--outline-variant);
+}

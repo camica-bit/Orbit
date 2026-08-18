@@ -1,0 +1,7 @@
+.cursor {
+  display: inline-block;
+  height: 1em;
+  vertical-align: text-bottom;
+  margin-left: 2px;
+  flex-shrink: 0;
+}

@@ -1,0 +1,89 @@
+.header {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 32px;
+  border-bottom: 2px solid var(--surface-variant);
+  flex-shrink: 0;
+}
+
+.exitBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--on-surface-variant);
+  font-size: var(--text-label-mono);
+  letter-spacing: var(--ls-label-mono);
+  opacity: 0.5;
+  transition: opacity 0.2s;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+.exitBtn:hover { opacity: 1; }
+.exitBtn:hover span { transform: translateX(-2px); }
+.exitBtn span { transition: transform 0.2s; }
+
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.sessionLabel {
+  color: var(--secondary);
+  font-size: var(--text-label-mono);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.timerWrap {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.timer {
+  color: var(--on-surface);
+  font-variant-numeric: tabular-nums;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.timerEst {
+  color: var(--outline);
+  font-size: var(--text-label-mono);
+}
+
+.brand {
+  color: var(--outline);
+  font-size: var(--text-label-mono);
+  letter-spacing: 0.2em;
+  opacity: 0.5;
+}
+
+/* Full-width progress bar */
+.progressTrack {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: var(--surface-container-highest);
+}
+
+.progressFill {
+  height: 100%;
+  background-color: var(--secondary);
+  transition: width 1s linear;
+  min-width: 4px;
+}
+
+.progressComplete {
+  background-color: var(--orbit-gold);
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+}

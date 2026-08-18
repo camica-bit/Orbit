@@ -1,0 +1,110 @@
+.hero {
+  background-color: var(--surface-container-low);
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  .hero { padding: 40px; }
+}
+
+/* Dithered background accent */
+.overlay {
+  position: absolute;
+  right: 0; top: 0;
+  width: 40%;
+  height: 100%;
+  background-image: radial-gradient(circle, var(--surface-variant) 20%, transparent 20%);
+  background-size: 8px 8px;
+  opacity: 0.12;
+  pointer-events: none;
+}
+
+.inner { position: relative; z-index: 1; }
+
+.statusBar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.statusLabel {
+  color: var(--secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.taskTitle {
+  color: var(--on-surface);
+  margin-bottom: 8px;
+  line-height: 1.15;
+}
+
+.estimate {
+  color: var(--on-surface-variant);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.rationale {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.rationaleBar {
+  width: 3px;
+  min-height: 100%;
+  background-color: var(--outline-variant);
+  flex-shrink: 0;
+  align-self: stretch;
+}
+
+.rationaleText {
+  color: var(--on-surface-variant);
+  font-style: italic;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.startBtn {
+  font-size: 16px;
+  font-weight: 700;
+  padding: 16px 32px;
+  letter-spacing: 0.12em;
+}
+
+.actionBtn {
+  padding: 12px 20px;
+}
+
+.actionBtnMuted {
+  color: var(--on-surface-variant);
+}
+.actionBtnMuted:hover {
+  color: var(--on-surface);
+}
+
+.rescheduleLink {
+  color: var(--outline);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--text-label-mono);
+  letter-spacing: var(--ls-label-mono);
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-underline-offset: 4px;
+  transition: color 0.15s;
+  padding: 4px 8px;
+}
+.rescheduleLink:hover { color: var(--on-surface); }

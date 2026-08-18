@@ -1,0 +1,118 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  width: 100%;
+  max-width: 500px;
+}
+
+/* Timer Ring */
+.timerRingWrap {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timerRing {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.trackCircle {
+  fill: none;
+  stroke: var(--surface-container-high);
+  stroke-width: 3;
+  stroke-dasharray: 4 4;
+}
+
+.progressCircle {
+  fill: none;
+  stroke: var(--secondary);
+  stroke-width: 4;
+  stroke-linecap: square;
+  stroke-dasharray: 553;
+  stroke-dashoffset: 553;
+  transition: stroke-dashoffset 1s linear;
+  filter: drop-shadow(0 0 6px rgba(200, 200, 176, 0.5));
+}
+
+.progressPaused {
+  stroke: var(--outline);
+  filter: none;
+}
+
+.tickMark {
+  stroke: var(--outline-variant);
+  stroke-width: 2;
+}
+
+/* Center content */
+.timerCenter {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.elapsedTime {
+  color: var(--on-surface);
+  font-variant-numeric: tabular-nums;
+  font-size: 52px;
+  line-height: 1;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.6));
+}
+
+.taskName {
+  color: var(--on-surface-variant);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-align: center;
+  max-width: 160px;
+  line-height: 1.4;
+}
+
+.pausedLabel {
+  color: var(--error);
+  font-size: var(--text-label-mono);
+  letter-spacing: 0.12em;
+  margin-top: 4px;
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  max-width: 380px;
+}
+
+.mainBtn {
+  flex: 1;
+  padding: 16px;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  justify-content: center;
+}
+
+.doneBtn {
+  padding: 16px 24px;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+.progressLabel {
+  color: var(--on-surface-variant);
+  font-size: var(--text-label-mono);
+  letter-spacing: 0.06em;
+  opacity: 0.6;
+}

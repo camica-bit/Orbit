@@ -1,0 +1,161 @@
+/* ---- Card variant (desktop grid) ---- */
+.card {
+  background-color: var(--surface-container);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: background-color 0.15s;
+}
+.card:hover { background-color: var(--surface-container-high); }
+
+.cardInfo { background-color: var(--surface-container-highest); }
+.cardInfo:hover { background-color: var(--surface-container-highest); }
+
+.infoOverlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.cardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+.time {
+  font-size: var(--text-label-mono);
+  letter-spacing: var(--ls-label-mono);
+}
+
+.cardTitle {
+  color: var(--on-surface);
+  margin-bottom: 8px;
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.cardDesc {
+  color: var(--on-surface-variant);
+  flex: 1;
+  margin-bottom: 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  position: relative;
+  z-index: 1;
+}
+
+.cardFooter {
+  margin-top: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.lockBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--secondary);
+  font-size: var(--text-label-mono);
+  letter-spacing: var(--ls-label-mono);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.15s;
+}
+.lockBtn:hover { opacity: 0.75; }
+.lockBtn:hover .lockBtn { text-decoration: underline; }
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--on-surface-variant);
+}
+
+.meta {
+  color: var(--on-surface-variant);
+  font-size: var(--text-label-mono);
+}
+
+/* ---- List variant (mobile vertical) ---- */
+.listItem {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  position: relative;
+  z-index: 1;
+}
+
+.listItemInfo { opacity: 0.65; }
+.listItemInfo:hover { opacity: 1; transition: opacity 0.2s; }
+
+.node {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: var(--surface-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+
+.nodeDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.listCard {
+  flex: 1;
+  background-color: var(--surface-container);
+  padding: 14px;
+  transition: background-color 0.15s;
+}
+.listCard:hover { background-color: var(--surface-container-high); }
+
+.listCardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 6px;
+}
+
+.listTitle {
+  color: var(--on-surface);
+  font-weight: 600;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.listTime {
+  font-size: var(--text-label-mono);
+  color: var(--on-surface-variant);
+  background-color: var(--surface-container-highest);
+  padding: 2px 6px;
+  flex-shrink: 0;
+  margin-left: 8px;
+}
+
+.listMeta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--outline);
+}
+
+.listMetaText {
+  font-size: var(--text-label-mono);
+  color: var(--outline);
+}

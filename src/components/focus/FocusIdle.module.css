@@ -1,0 +1,130 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+  width: 100%;
+  max-width: 680px;
+}
+
+.heading {
+  color: var(--primary);
+  letter-spacing: 0.04em;
+  text-align: center;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.8));
+}
+
+.card {
+  width: 100%;
+  background-color: rgba(43, 42, 42, 0.88);
+  backdrop-filter: blur(6px);
+  padding: 32px;
+  position: relative;
+  overflow: hidden;
+}
+
+.cardInner { position: relative; z-index: 2; }
+
+.cardTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.objectiveRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.termIcon {
+  width: 32px;
+  height: 32px;
+  background-color: var(--secondary-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--secondary);
+}
+
+.objectiveLabel {
+  color: var(--secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.timeChip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--surface);
+  padding: 4px 10px;
+}
+
+.timeText {
+  color: var(--tertiary);
+  font-size: var(--text-label-mono);
+}
+
+.taskTitle {
+  color: var(--on-surface);
+  margin-bottom: 16px;
+  line-height: 1.2;
+}
+
+.rationale {
+  display: flex;
+  gap: 12px;
+  border-top: 2px solid var(--surface-variant);
+  padding-top: 16px;
+}
+
+.rationaleBar {
+  width: 3px;
+  flex-shrink: 0;
+  background-color: var(--outline-variant);
+  align-self: stretch;
+}
+
+.rationaleText {
+  color: var(--on-surface-variant);
+  font-style: italic;
+}
+
+.glow {
+  position: absolute;
+  inset: -40px;
+  background-color: rgba(200, 200, 176, 0.04);
+  filter: blur(32px);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  transition: background-color 0.5s;
+}
+.card:hover .glow { background-color: rgba(200, 200, 176, 0.09); }
+
+.startBtn {
+  background-color: var(--primary);
+  color: var(--on-primary-fixed);
+  font-weight: 700;
+  padding: 20px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 20px;
+  letter-spacing: 0.08em;
+  transition: background-color 0.12s;
+}
+.startBtn:hover { background-color: var(--primary-fixed); }
+.startBtn:focus { outline: 2px solid var(--secondary); outline-offset: 3px; }
+
+.startPulseWrap {
+  display: flex;
+  align-items: center;
+}

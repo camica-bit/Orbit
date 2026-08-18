@@ -1,0 +1,23 @@
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 60px;
+}
+
+.bar {
+  width: 4px;
+  background-color: var(--outline);
+  transition: height 0.08s ease, background-color 0.3s;
+  min-height: 4px;
+}
+
+.barActive {
+  background-color: var(--secondary);
+  animation: bar-dance 0.4s ease-in-out infinite alternate;
+}
+
+@keyframes bar-dance {
+  from { transform: scaleY(0.6); }
+  to   { transform: scaleY(1); }
+}

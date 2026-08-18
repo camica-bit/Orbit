@@ -1,0 +1,59 @@
+.section { }
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.title {
+  color: var(--on-surface);
+}
+
+.controls {
+  display: flex;
+  gap: 8px;
+}
+
+.arrowBtn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+}
+
+/* Desktop card grid */
+.cardGrid {
+  display: none;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* Mobile vertical timeline */
+.verticalTimeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+  padding-left: 28px;
+}
+
+.timelineLine {
+  position: absolute;
+  left: 10px;
+  top: 16px;
+  bottom: 16px;
+  width: 2px;
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--outline-variant) 0px,
+    var(--outline-variant) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+}
+
+@media (min-width: 768px) {
+  .cardGrid { display: grid; }
+  .verticalTimeline { display: none; }
+}
