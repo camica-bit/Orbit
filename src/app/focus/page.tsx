@@ -1,11 +1,12 @@
 "use client";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Starfield from "@/components/focus/Starfield";
 import FocusHeader from "@/components/focus/FocusHeader";
 import FocusIdle from "@/components/focus/FocusIdle";
 import FocusActive from "@/components/focus/FocusActive";
 import FocusComplete from "@/components/focus/FocusComplete";
+import OrbitPulse from "@/components/shared/OrbitPulse";
 import styles from "./page.module.css";
 
 type SessionState = "idle" | "active" | "paused" | "complete";
@@ -17,7 +18,7 @@ const DEFAULT_TASK = {
   aiRationale: "Your current priority task.",
 };
 
-export default function FocusPage() {
+function FocusSession() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -178,5 +179,20 @@ export default function FocusPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function FocusPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className={styles.page} style={{ display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Starfield />
+          <OrbitPulse size={24} gold />
+        </div>
+      }
+    >
+      <FocusSession />
+    </Suspense>
   );
 }
