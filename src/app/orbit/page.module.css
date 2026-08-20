@@ -14,7 +14,9 @@
 }
 
 /* Header */
-.header { margin-bottom: 36px; }
+.header {
+  margin-bottom: 36px;
+}
 
 .headerTitle {
   display: flex;
@@ -23,7 +25,9 @@
   margin-bottom: 10px;
 }
 
-.title { color: var(--primary); }
+.title {
+  color: var(--primary);
+}
 
 .subtitle {
   color: var(--on-surface-variant);
@@ -39,11 +43,15 @@
 }
 
 @media (min-width: 640px) {
-  .bentoGrid { grid-template-columns: repeat(2, 1fr); }
+  .bentoGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (min-width: 1024px) {
-  .bentoGrid { grid-template-columns: repeat(3, 1fr); }
+  .bentoGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
 
 /* Major event spans full width on small, 2 cols on md+ */
@@ -52,7 +60,9 @@
 }
 
 @media (min-width: 640px) {
-  .majorEventWrap { grid-column: span 2; }
+  .majorEventWrap {
+    grid-column: span 2;
+  }
 }
 
 /* Background glow */
@@ -69,4 +79,35 @@
   z-index: -1;
   border-radius: 50%;
   mix-blend-mode: screen;
+}
+
+/* Loading skeleton */
+.skeletonGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+@media (min-width: 640px) {
+  .skeletonGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.skeletonCard {
+  height: 160px;
+  background: var(--surface-container);
+  opacity: 0.4;
+}
+
+/* Empty state */
+.emptyState {
+  grid-column: 1 / -1;
+  padding: 40px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--surface-container);
+  color: var(--on-surface-variant);
 }

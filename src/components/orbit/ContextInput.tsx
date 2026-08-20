@@ -5,9 +5,10 @@ import styles from "./ContextInput.module.css";
 
 interface ContextInputProps {
   onSubmit?: (text: string) => void;
+  loading?: boolean;
 }
 
-export default function ContextInput({ onSubmit }: ContextInputProps) {
+export default function ContextInput({ onSubmit, loading = false }: ContextInputProps) {
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
 
@@ -46,9 +47,11 @@ export default function ContextInput({ onSubmit }: ContextInputProps) {
           <button
             type="submit"
             className={`pixel-btn pixel-btn-secondary ${styles.submitBtn}`}
-            disabled={!value.trim()}
+            disabled={!value.trim() || loading}
           >
-            INPUT
+            {loading ? (
+              <span className="material-symbols-outlined anim-orbit-pulse" style={{ fontSize: 16 }}>sync</span>
+            ) : "INPUT"}
           </button>
         </div>
         <p className={`${styles.hint} font-label-mono`}>

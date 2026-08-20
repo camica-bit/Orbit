@@ -123,12 +123,24 @@ export default function ListenPage() {
     else if (listenState === "idle") startListening();
   };
 
-  const handleDone = () => {
+  const handleDone = async () => {
     recognitionRef.current?.stop();
     stopAudioAnalysis();
     setListenState("processing");
-    // TODO: wire to AI in Phase 3
-    setTimeout(() => router.push("/"), 1200);
+    try {
+      // Send transcript to Gemini AI pipeline
+      if (transcript.trim()) {
+        await fetch("/api/ai/extract", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: transcript.trim() }),
+        });
+      }
+    } catch {
+      // Even on error, navigate home
+    }
+    router.push("/");
+    router.refresh();
   };
 
   // Space key toggle, Escape = exit

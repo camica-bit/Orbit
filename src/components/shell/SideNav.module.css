@@ -97,6 +97,46 @@
   padding-top: 16px;
 }
 
+/* User Badge */
+.userBadge {
+  background-color: var(--surface-container);
+  padding: 8px 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.userDot {
+  width: 8px;
+  height: 8px;
+  background-color: var(--secondary);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--secondary);
+  flex-shrink: 0;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.userPrefix {
+  font-size: 8px;
+  color: var(--on-surface-variant);
+  letter-spacing: 0.1em;
+}
+
+.userEmail {
+  font-size: 11px;
+  color: var(--primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: lowercase;
+}
+
 .syncBtn {
   width: 100%;
   margin-bottom: 12px;
@@ -124,6 +164,7 @@
   cursor: pointer;
   background: none;
   border: none;
+  text-decoration: none;
 }
 .footerLink:hover { color: var(--on-surface); }
 

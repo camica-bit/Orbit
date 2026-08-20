@@ -70,3 +70,41 @@
   color: var(--on-surface);
   text-align: center;
 }
+
+/* Loading skeleton */
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.skeletonHero {
+  height: 280px;
+  background: var(--surface-variant);
+  border-radius: 2px;
+  opacity: 0.4;
+}
+
+.skeletonRow {
+  height: 72px;
+  background: var(--surface-variant);
+  border-radius: 2px;
+  opacity: 0.25;
+}
+
+/* Empty / error state */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  min-height: 50vh;
+  text-align: center;
+  padding: var(--margin-mobile);
+}
+
+.emptyText {
+  color: var(--on-surface-variant);
+  max-width: 380px;
+}

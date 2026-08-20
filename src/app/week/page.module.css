@@ -15,6 +15,211 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.title { color: var(--primary); }
+
+.weekLabel {
+  color: var(--outline);
+  font-size: var(--text-label-mono);
+  letter-spacing: 0.08em;
+  margin-left: auto;
+}
+
+.subtitle {
+  color: var(--on-surface-variant);
+  max-width: 560px;
+}
+
+/* Summary row */
+.summaryRow {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.summaryCard {
+  flex: 1;
+  min-width: 120px;
+  background: var(--surface-container);
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.summaryNum {
+  color: var(--secondary);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.summaryLabel {
+  color: var(--on-surface-variant);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Week grid */
+.weekGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+@media (max-width: 640px) {
+  .weekGrid { grid-template-columns: repeat(4, 1fr); }
+}
+
+.dayCard {
+  background-color: var(--surface-container);
+  padding: 12px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-height: 160px;
+  transition: background-color 0.15s;
+  cursor: pointer;
+}
+.dayCard:hover { background-color: var(--surface-container-high); }
+
+.dayCardToday {
+  background-color: var(--secondary-container);
+  border-top-color: var(--secondary);
+  border-left-color: var(--secondary);
+}
+
+.dayCardSelected {
+  border-top-color: var(--primary);
+  border-left-color: var(--primary);
+}
+
+.dayLabel {
+  font-size: var(--text-label-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.todayBadge {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--on-secondary);
+  background-color: var(--secondary);
+  padding: 1px 5px;
+}
+
+.barWrap {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  width: 100%;
+  min-height: 60px;
+}
+
+.bar {
+  width: 8px;
+  min-height: 4px;
+  transition: height 0.4s ease;
+}
+
+.dayStats {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.statNum {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 9px;
+  color: var(--on-surface-variant);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.statHours {
+  font-size: 9px;
+  color: var(--outline);
+  letter-spacing: 0.06em;
+}
+
+.restDay {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--outline);
+  opacity: 0.5;
+}
+
+/* Task detail panel */
+.detailPanel {
+  background-color: var(--surface-container);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+}
+
+.detailHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.detailTitle { color: var(--on-surface); }
+
+.detailClose {
+  background: none;
+  border: none;
+  color: var(--on-surface-variant);
+  cursor: pointer;
+  padding: 4px;
+  transition: color 0.15s;
+}
+.detailClose:hover { color: var(--on-surface); }
+
+.taskList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.taskItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--on-surface);
+}
+
+.taskDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.taskDone {
+  color: var(--on-surface-variant);
+  text-decoration: line-through;
+}
+
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
 }
 
 .title { color: var(--primary); }

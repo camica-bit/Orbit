@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import OrbitPulse from "@/components/shared/OrbitPulse";
+import { useAuth } from "@/context/AuthContext";
 import styles from "./SideNav.module.css";
 
 const NAV_ITEMS = [
@@ -18,9 +19,21 @@ interface SideNavProps {
 
 export default function SideNav({ activeNav, onNavChange }: SideNavProps) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, signOut } = useAuth();
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
+
+  const handleSignOut = async () => {
+    await signOut();
+    router.push("/login");
+    router.refresh();
+  };
+
+  const userDisplayName = user?.email
+    ? user.email.split("@")[0]
+    : "Pilot";
 
   return (
     <nav className={styles.sidenav}>
@@ -68,20 +81,51 @@ export default function SideNav({ activeNav, onNavChange }: SideNavProps) {
 
       {/* Bottom Actions */}
       <div className={styles.footer}>
-        <div className="pixel-divider-h" style={{ marginBottom: 16 }} />
+        {/* User identification badge */}
+        {user && (
+          <div className={`pixel-border ${styles.userBadge}`}>
+            <div className={styles.userDot} />
+            <div className={styles.userInfo}>
+              <span className={`${styles.userPrefix} font-label-mono`}>AUTH ID</span>
+              <span className={`${styles.userEmail} font-label-mono`} title={user.email}>
+                {userDisplayName}
+              </span>
+            </div>
+          </div>
+        )}
+
+        <div className="pixel-divider-h" style={{ marginBottom: 16, marginTop: user ? 12 : 0 }} />
+
         <button className={`pixel-btn pixel-btn-primary ${styles.syncBtn}`}>
           <span className="material-symbols-outlined" style={{ fontSize: 18 }}>sync</span>
           Sync Core
         </button>
+
         <div className={styles.footerLinks}>
           <button className={`${styles.footerLink} font-label-mono`}>
             <span className="material-symbols-outlined" style={{ fontSize: 16 }}>help</span>
             Support
           </button>
-          <button className={`${styles.footerLink} ${styles.footerLinkDanger} font-label-mono`}>
-            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>logout</span>
-            Log Out
-          </button>
+
+          {user ? (
+            <button
+              id="sidenav-logout-btn"
+              onClick={handleSignOut}
+              className={`${styles.footerLink} ${styles.footerLinkDanger} font-label-mono`}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>logout</span>
+              Log Out
+            </button>
+          ) : (
+            <Link
+              href="/login"
+              className={`${styles.footerLink} font-label-mono`}
+              style={{ color: "var(--secondary)" }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>login</span>
+              Sign In
+            </Link>
+          )}
         </div>
       </div>
     </nav>

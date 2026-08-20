@@ -1,0 +1,274 @@
+.loginWrap {
+  min-height: 100dvh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  background-color: var(--surface-container-lowest);
+}
+
+.authContainer {
+  width: 100%;
+  max-width: 460px;
+  position: relative;
+  z-index: 10;
+}
+
+/* Header branding */
+.brandHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 28px;
+  text-align: center;
+}
+
+.logoRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.logoIcon {
+  width: 36px;
+  height: 36px;
+  background-color: var(--secondary-container);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.protocolBadge {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--secondary);
+  background-color: var(--secondary-container);
+  padding: 3px 8px;
+  text-transform: uppercase;
+}
+
+.subtitle {
+  color: var(--on-surface-variant);
+  font-size: 13px;
+  max-width: 360px;
+  margin-top: 4px;
+}
+
+/* Main Auth Card */
+.card {
+  background-color: var(--surface-container);
+  padding: 28px 24px;
+  position: relative;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.tabBtn {
+  background-color: var(--surface-container-low);
+  color: var(--on-surface-variant);
+  border: 2px solid var(--outline-variant);
+  padding: 10px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: all 0.15s ease;
+}
+
+.tabBtn:hover {
+  color: var(--on-surface);
+  background-color: var(--surface-container-high);
+}
+
+.tabBtnActive {
+  background-color: var(--secondary-container);
+  color: var(--primary);
+  border-color: var(--secondary);
+  box-shadow: 0 0 8px rgba(200, 200, 176, 0.2);
+}
+
+/* Method Selector (Password vs Magic Link) */
+.methodSelector {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--outline-variant);
+}
+
+.methodBtn {
+  background: none;
+  border: none;
+  color: var(--on-surface-variant);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  padding: 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.15s;
+}
+
+.methodBtn:hover {
+  color: var(--on-surface);
+}
+
+.methodBtnActive {
+  color: var(--secondary);
+  font-weight: 600;
+  border-bottom: 2px solid var(--secondary);
+}
+
+/* Form inputs */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--on-surface-variant);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.inputBox {
+  display: flex;
+  align-items: center;
+  background-color: var(--surface-container-lowest);
+  padding: 10px 14px;
+  gap: 10px;
+  border: 2px solid var(--outline-variant);
+  border-top-color: var(--surface-container-highest);
+  border-left-color: var(--surface-container-highest);
+  transition: border-color 0.15s ease;
+}
+
+.inputBox:focus-within {
+  border-color: var(--secondary);
+  border-bottom-color: var(--secondary);
+  box-shadow: 0 0 8px rgba(200, 200, 176, 0.25);
+}
+
+.inputPrompt {
+  color: var(--secondary);
+  font-family: var(--font-label-mono), monospace;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.input {
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--on-surface);
+  font-family: var(--font-label-mono), monospace;
+  font-size: 13px;
+  width: 100%;
+  letter-spacing: 0.04em;
+}
+
+.input::placeholder {
+  color: var(--outline);
+  opacity: 0.7;
+}
+
+/* Submit Action Button */
+.submitBtn {
+  width: 100%;
+  padding: 14px;
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 13px;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+}
+
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Alerts and Feedbacks */
+.alertError {
+  background-color: var(--error-container);
+  border: 1px solid var(--error);
+  color: var(--on-error-container);
+  padding: 10px 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  margin-bottom: 16px;
+}
+
+.alertSuccess {
+  background-color: var(--secondary-container);
+  border: 1px solid var(--secondary);
+  color: var(--primary);
+  padding: 10px 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 12px;
+  line-height: 1.4;
+  margin-bottom: 16px;
+}
+
+/* Footer / System Status */
+.telemetry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--outline-variant);
+  font-size: 10px;
+  color: var(--outline);
+}
+
+.telemetryStatus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.glowBall {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--secondary);
+}
+
+.version {
+  letter-spacing: 0.08em;
+}

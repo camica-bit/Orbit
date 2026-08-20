@@ -8,6 +8,7 @@ export interface ContextItem {
   bgColor?: string;
   tags?: string[];
   onEdit?: () => void;
+  onDelete?: () => void;
 }
 
 export default function ContextCard({ item }: { item: ContextItem }) {
@@ -23,11 +24,23 @@ export default function ContextCard({ item }: { item: ContextItem }) {
         >
           {item.category.toUpperCase()}
         </span>
-        {item.onEdit && (
-          <button className={styles.editBtn} onClick={item.onEdit} aria-label={`Edit ${item.category}`}>
-            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>edit</span>
-          </button>
-        )}
+        <div className={styles.actions}>
+          {item.onEdit && (
+            <button className={styles.editBtn} onClick={item.onEdit} aria-label={`Edit ${item.category}`}>
+              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>edit</span>
+            </button>
+          )}
+          {item.onDelete && (
+            <button
+              className={styles.editBtn}
+              onClick={item.onDelete}
+              aria-label={`Delete ${item.category}`}
+              style={{ color: "var(--error)" }}
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 16 }}>delete</span>
+            </button>
+          )}
+        </div>
       </div>
 
       <p className={`${styles.content} font-body-lg`}>{item.content}</p>
