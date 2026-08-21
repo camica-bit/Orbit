@@ -5,9 +5,9 @@
 
 /* ---- Orbit AI Pulse (circular breathing) ---- */
 @keyframes orbit-pulse {
-  0%   { transform: scale(0.85); opacity: 0.5; }
-  50%  { transform: scale(1.2);  opacity: 1;   }
-  100% { transform: scale(0.85); opacity: 0.5; }
+  0%   { transform: scale(1.0); opacity: 0.5; }
+  50%  { transform: scale(1.01);  opacity: 1;   }
+  100% { transform: scale(1.0); opacity: 0.5; }
 }
 .anim-orbit-pulse {
   animation: orbit-pulse 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;

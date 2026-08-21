@@ -1,4 +1,5 @@
 import { getAuthUser } from "@/lib/supabase/server";
+import { normalizeClockTime, resolveTimeToClock } from "@/app/api/ai/extract/route";
 
 /**
  * GET /api/ai/whats-next
@@ -33,6 +34,27 @@ export async function GET() {
       task: null,
       rationale: "No pending tasks. Tell Orbit what's on your mind below.",
     });
+  }
+
+  // Pre-resolve any tasks that had relative/unresolved scheduled_time
+  const { data: ctxData } = await supabase
+    .from("context_items")
+    .select("category, content, event_date")
+    .eq("user_id", user.id);
+
+  const contextDirectives = (ctxData ?? []).map(
+    (c) => `[${c.category}] ${c.content}${c.event_date ? ` (Date: ${c.event_date})` : ""}`
+  );
+
+  for (const t of tasks) {
+    if (t.scheduled_time && !normalizeClockTime(t.scheduled_time)) {
+      const resolved = resolveTimeToClock(t.scheduled_time, contextDirectives, []);
+      t.scheduled_time = resolved.time;
+      if (resolved.time) {
+        t.type = "fixed";
+        if (resolved.rationale) t.ai_rationale = resolved.rationale;
+      }
+    }
   }
 
   const now = new Date();

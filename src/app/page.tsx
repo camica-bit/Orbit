@@ -207,6 +207,7 @@ export default function TodayPage() {
           <HeroCard
             taskTitle={heroTask.title}
             estimatedMins={heroTask.estimated_mins ?? 30}
+            scheduledTime={heroTask.scheduled_time}
             aiRationale={heroRationale}
             onStart={() =>
               router.push(

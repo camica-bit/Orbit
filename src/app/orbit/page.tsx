@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import ContextCard, { ContextItem } from "@/components/orbit/ContextCard";
 import MajorEventCard, { MajorEvent } from "@/components/orbit/MajorEventCard";
 import ContextInput from "@/components/orbit/ContextInput";
@@ -64,16 +64,20 @@ export default function OrbitPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  const loadRef = useRef<() => Promise<void>>(async () => {});
+  const contextItemsRef = useRef<ContextItem[]>([]);
+  contextItemsRef.current = contextItems;
+
   const handleEdit = useCallback((id: string) => {
-    const item = contextItems.find((i) => i.id === id);
+    const item = contextItemsRef.current.find((i) => i.id === id);
     const newContent = window.prompt("Edit context directive:", item?.content ?? "");
     if (!newContent?.trim() || newContent === item?.content) return;
     fetch("/api/context", {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id, content: newContent.trim() }),
-    }).then(() => load());
-  }, [contextItems]); // eslint-disable-line react-hooks/exhaustive-deps
+    }).then(() => loadRef.current());
+  }, []);
 
   const handleDelete = useCallback((id: string) => {
     if (!window.confirm("Remove this context directive from Orbit?")) return;
@@ -81,8 +85,8 @@ export default function OrbitPage() {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
-    }).then(() => load());
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    }).then(() => loadRef.current());
+  }, []);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -100,6 +104,10 @@ export default function OrbitPage() {
       setLoading(false);
     }
   }, [handleEdit, handleDelete]);
+
+  useEffect(() => {
+    loadRef.current = load;
+  }, [load]);
 
   useEffect(() => {
     load();

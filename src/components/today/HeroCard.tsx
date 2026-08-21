@@ -6,6 +6,7 @@ import styles from "./HeroCard.module.css";
 interface HeroCardProps {
   taskTitle: string;
   estimatedMins: number;
+  scheduledTime?: string | null;
   aiRationale?: string;
   onStart: () => void;
   onDone: () => void;
@@ -16,6 +17,7 @@ interface HeroCardProps {
 export default function HeroCard({
   taskTitle,
   estimatedMins,
+  scheduledTime,
   aiRationale,
   onStart,
   onDone,
@@ -42,12 +44,12 @@ export default function HeroCard({
           {taskTitle}
         </h2>
 
-        {/* Time estimate */}
+        {/* Scheduled time */}
         <p className={`${styles.estimate} font-body-lg`}>
           <span className="material-symbols-outlined" style={{ fontSize: 16, verticalAlign: "middle" }}>
-            timer
+            schedule
           </span>{" "}
-          Estimated ~{estimatedMins} mins remaining
+          {scheduledTime ? `Scheduled for ${scheduledTime}` : `Flexible · ~${estimatedMins} mins`}
         </p>
 
         {/* AI rationale */}
