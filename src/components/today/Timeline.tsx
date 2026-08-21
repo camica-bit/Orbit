@@ -7,7 +7,7 @@ interface TimelineProps {
 
 export default function Timeline({ events }: TimelineProps) {
   return (
-    <section className={styles.section} aria-label="Path ahead timeline">
+    <section aria-label="Path ahead timeline">
       <div className={styles.header}>
         <h3 className={`${styles.title} font-headline-lg`}>The Path Ahead</h3>
         <div className={styles.controls}>
