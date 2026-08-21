@@ -5,11 +5,13 @@ import styles from "./TopBar.module.css";
 
 export default function TopBar() {
   const router = useRouter();
-  const { user, signOut } = useAuth();
+  const { user, signOut, displayName } = useAuth();
 
   const handleProfileClick = async () => {
     if (user) {
-      const confirmLogout = window.confirm(`Signed in as ${user.email}.\nLog out from Orbit?`);
+      const confirmLogout = window.confirm(
+        `Signed in as ${displayName} (${user.email}).\nLog out from Orbit?`
+      );
       if (confirmLogout) {
         await signOut();
         router.push("/login");

@@ -20,7 +20,7 @@ interface SideNavProps {
 export default function SideNav({ activeNav, onNavChange }: SideNavProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, signOut } = useAuth();
+  const { user, signOut, displayName } = useAuth();
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -31,9 +31,7 @@ export default function SideNav({ activeNav, onNavChange }: SideNavProps) {
     router.refresh();
   };
 
-  const userDisplayName = user?.email
-    ? user.email.split("@")[0]
-    : "Pilot";
+  const userDisplayName = displayName || "Pilot";
 
   return (
     <nav className={styles.sidenav}>

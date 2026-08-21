@@ -47,7 +47,7 @@ function toTimelineEvent(
 
 export default function TodayPage() {
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, displayName } = useAuth();
   const [loadState, setLoadState] = useState<LoadState>("loading");
   const [heroTask, setHeroTask] = useState<DbTask | null>(null);
   const [heroRationale, setHeroRationale] = useState<string>("");
@@ -62,9 +62,7 @@ export default function TodayPage() {
     day: "numeric",
   });
 
-  const userDisplayName = user?.email
-    ? user.email.split("@")[0]
-    : "Pilot";
+  const userDisplayName = displayName || "Pilot";
 
   const loadRef = useRef<() => Promise<void>>(async () => {});
 

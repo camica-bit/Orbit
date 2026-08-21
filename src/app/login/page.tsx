@@ -15,6 +15,8 @@ export default function LoginPage() {
 
   const [mode, setMode] = useState<AuthMode>("signin");
   const [method, setMethod] = useState<AuthMethod>("password");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -73,9 +75,17 @@ export default function LoginPage() {
 
     setLoading(true);
 
+    const userMeta =
+      mode === "signup"
+        ? {
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
+          }
+        : undefined;
+
     try {
       if (method === "magiclink") {
-        const { error } = await signInWithOtp(email.trim());
+        const { error } = await signInWithOtp(email.trim(), userMeta);
         if (error) {
           setErrorMessage(error.message);
         } else {
@@ -95,7 +105,11 @@ export default function LoginPage() {
           }, 400);
         }
       } else {
-        const { error, user } = await signUpWithPassword(email.trim(), password);
+        const { error, user } = await signUpWithPassword(
+          email.trim(),
+          password,
+          userMeta
+        );
         if (error) {
           setErrorMessage(error.message);
         } else if (user && !user.identities?.length) {
@@ -249,6 +263,60 @@ export default function LoginPage() {
 
           {/* Input Form */}
           <form onSubmit={handleSubmit} className={styles.form}>
+            {mode === "signup" && (
+              <div className={styles.nameRow}>
+                <div className={styles.field}>
+                  <label
+                    htmlFor="auth-first-name"
+                    className={`${styles.label} font-label-mono`}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: 13 }}>
+                      badge
+                    </span>
+                    First Name
+                  </label>
+                  <div className={styles.inputBox}>
+                    <span className={styles.inputPrompt}>&gt;</span>
+                    <input
+                      id="auth-first-name"
+                      type="text"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                      placeholder="Jane"
+                      className={styles.input}
+                      autoComplete="given-name"
+                      disabled={loading}
+                    />
+                  </div>
+                </div>
+
+                <div className={styles.field}>
+                  <label
+                    htmlFor="auth-last-name"
+                    className={`${styles.label} font-label-mono`}
+                  >
+                    <span className="material-symbols-outlined" style={{ fontSize: 13 }}>
+                      badge
+                    </span>
+                    Last Name
+                  </label>
+                  <div className={styles.inputBox}>
+                    <span className={styles.inputPrompt}>&gt;</span>
+                    <input
+                      id="auth-last-name"
+                      type="text"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                      placeholder="Doe"
+                      className={styles.input}
+                      autoComplete="family-name"
+                      disabled={loading}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className={styles.field}>
               <label htmlFor="auth-email" className={`${styles.label} font-label-mono`}>
                 <span className="material-symbols-outlined" style={{ fontSize: 13 }}>
