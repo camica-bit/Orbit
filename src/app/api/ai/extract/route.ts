@@ -28,30 +28,34 @@ ${existingTasksSummary}
 }
 
 REASONING & SCHEDULING GUIDELINES:
-1. Dynamic Context & Constraint Accounting:
-   - Carefully evaluate the user's input against ALL provided personal context constraints.
-   - When the user asks to schedule a task in relation to any daily routine, rhythm, event, or commitment (e.g., "after X", "before Y"), locate that item in their Personal Context and derive the exact clock time accordingly.
-   - For activities scheduled after a commitment/routine, use the end time of that commitment.
-   - For activities scheduled before a commitment/routine, ensure the task is set to conclude before that commitment begins.
-   - Respect user rhythms, routines, and quiet hours without overlap unless explicitly requested.
-2. Output Specifications:
-   - "scheduled_time" MUST strictly be a standard 12-hour clock time (e.g. "5:00 PM", "10:00 AM", "2:30 PM") or null if the task is completely flexible.
-   - NEVER output relative or placeholder text in "scheduled_time".
-   - "type" MUST be "fixed" if scheduled at a specific clock time, "flexible" if it can happen anytime, or "informational" for notes/checklists.
-   - "ai_rationale" MUST be a concise explanation describing how the user's personal context or constraints guided the scheduled time and priority.
+1. Title Extraction:
+   - Extract a clean, concise, action-oriented title (e.g. "Meeting", "Study Calculus", "Team Sync", "Dentist Appointment").
+   - NEVER use the user's conversational command or raw prompt sentence (e.g. "I have a meeting after I take my nap so add a task for that", "remind me to...", "add a task for...") as the title.
+2. Dynamic Schedule & Constraint Reasoning:
+   - Reason over ALL user personal context constraints and today's existing tasks.
+   - When the user schedules in relation to a context event or daily rhythm (e.g. "after my nap", "before standup", "after lecture"):
+     - Look up that event's start and end times in Personal Context or Existing Tasks.
+     - "after [event]": lock "scheduled_time" to the exact END time of that event (e.g. if nap is 4:00 PM to 5:00 PM, "after my nap" -> "5:00 PM").
+     - "before [event]": lock "scheduled_time" to finish before the START time of that event.
+   - Meetings, calls, appointments, and events anchored to a specific time or context rhythm MUST be type: "fixed" with a locked "scheduled_time".
+   - Only set type: "flexible" and "scheduled_time": null if the task has no specific time anchor and can happen anytime during the day.
+3. Output Specifications:
+   - "scheduled_time" MUST strictly be a standard 12-hour clock time (e.g. "5:00 PM", "10:00 AM", "2:30 PM") or null if completely flexible.
+   - NEVER output relative or placeholder text (like "after nap") in "scheduled_time".
+   - "ai_rationale" MUST concisely explain how the time was calculated (e.g. "Scheduled for 5:00 PM immediately following your nap (4:00 PM – 5:00 PM).").
 
 Return ONLY a valid JSON array of task objects matching this schema:
 [
   {
-    "title": "Short action-oriented title",
-    "description": "Optional detail or null",
+    "title": "Meeting",
+    "description": null,
     "estimated_mins": 30, // integer minutes
     "type": "fixed", // strictly one of: "fixed", "flexible", "informational"
     "scheduled_time": "5:00 PM", // standard 12-hour clock format (e.g. "5:00 PM", "10:00 AM") or null
-    "icon": "task_alt", // Material symbol name matching the activity
+    "icon": "groups", // Material symbol name matching the activity
     "meta": "30 min", // Short duration tag
-    "ai_rationale": "Scheduled based on personal context constraints",
-    "priority": 7 // integer 1-10
+    "ai_rationale": "Scheduled for 5:00 PM immediately following your nap (4:00 PM – 5:00 PM).",
+    "priority": 8 // integer 1-10
   }
 ]
 
@@ -235,7 +239,7 @@ async function callGemini(
     return localFallback(text, contextDirectives, existingTasks);
   }
 
-  const models = ["gemini-2.0-flash", "gemini-1.5-flash"];
+  const models = ["gemini-3.6-flash", "gemini-3.7-flash", "gemini-flash-latest", "gemini-pro-latest"];
 
   for (const model of models) {
     try {
