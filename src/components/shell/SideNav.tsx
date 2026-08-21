@@ -1,5 +1,6 @@
 "use client";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import OrbitPulse from "@/components/shared/OrbitPulse";
 import { useAuth } from "@/context/AuthContext";
@@ -37,11 +38,14 @@ export default function SideNav({ activeNav, onNavChange }: SideNavProps) {
     <nav className={styles.sidenav}>
       {/* Logo / Header */}
       <div className={styles.header}>
-        <div className={`${styles.logoMark} pixel-border`}>
-          <span className="material-symbols-outlined" style={{ fontSize: 28, color: "var(--secondary)" }}>
-            token
-          </span>
-        </div>
+        <Image
+          src="/Logo.png"
+          alt="Orbit Logo"
+          width={40}
+          height={40}
+          priority
+          style={{ objectFit: "contain", flexShrink: 0 }}
+        />
         <div>
           <h1 className={`${styles.logoText} font-headline-md`}>Orbit v1.0</h1>
           <div className={styles.logoSub}>

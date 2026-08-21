@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import Starfield from "@/components/focus/Starfield";
 import OrbitPulse from "@/components/shared/OrbitPulse";
@@ -59,17 +60,17 @@ export default function LoginPage() {
     setSuccessMessage(null);
 
     if (!email.trim()) {
-      setErrorMessage("Please input your user terminal email.");
+      setErrorMessage("Please input your user email.");
       return;
     }
 
     if (method === "password" && !password) {
-      setErrorMessage("Password directive required.");
+      setErrorMessage("Password required.");
       return;
     }
 
     if (method === "password" && password.length < 6) {
-      setErrorMessage("Password protocol requires at least 6 characters.");
+      setErrorMessage("Password requires at least 6 characters.");
       return;
     }
 
@@ -78,9 +79,9 @@ export default function LoginPage() {
     const userMeta =
       mode === "signup"
         ? {
-            firstName: firstName.trim(),
-            lastName: lastName.trim(),
-          }
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+        }
         : undefined;
 
     try {
@@ -141,14 +142,14 @@ export default function LoginPage() {
         {/* Brand Header */}
         <div className={styles.brandHeader}>
           <div className={styles.logoRow}>
-            <div className={`pixel-border ${styles.logoIcon}`}>
-              <span
-                className="material-symbols-outlined"
-                style={{ fontSize: 22, color: "var(--secondary)" }}
-              >
-                token
-              </span>
-            </div>
+            <Image
+              src="/Logo.png"
+              alt="Orbit Logo"
+              width={36}
+              height={36}
+              priority
+              style={{ objectFit: "contain" }}
+            />
             <h1 className="font-headline-lg" style={{ color: "var(--on-surface)", letterSpacing: "0.04em" }}>
               ORBIT
             </h1>
@@ -169,9 +170,8 @@ export default function LoginPage() {
           <div className={styles.tabs}>
             <button
               type="button"
-              className={`${styles.tabBtn} ${
-                mode === "signin" ? styles.tabBtnActive : ""
-              } font-label-mono`}
+              className={`${styles.tabBtn} ${mode === "signin" ? styles.tabBtnActive : ""
+                } font-label-mono`}
               onClick={() => {
                 setMode("signin");
                 setErrorMessage(null);
@@ -185,9 +185,8 @@ export default function LoginPage() {
             </button>
             <button
               type="button"
-              className={`${styles.tabBtn} ${
-                mode === "signup" ? styles.tabBtnActive : ""
-              } font-label-mono`}
+              className={`${styles.tabBtn} ${mode === "signup" ? styles.tabBtnActive : ""
+                } font-label-mono`}
               onClick={() => {
                 setMode("signup");
                 setErrorMessage(null);
@@ -205,9 +204,8 @@ export default function LoginPage() {
           <div className={styles.methodSelector}>
             <button
               type="button"
-              className={`${styles.methodBtn} ${
-                method === "password" ? styles.methodBtnActive : ""
-              } font-label-mono`}
+              className={`${styles.methodBtn} ${method === "password" ? styles.methodBtnActive : ""
+                } font-label-mono`}
               onClick={() => {
                 setMethod("password");
                 setErrorMessage(null);
@@ -220,9 +218,8 @@ export default function LoginPage() {
             </button>
             <button
               type="button"
-              className={`${styles.methodBtn} ${
-                method === "magiclink" ? styles.methodBtnActive : ""
-              } font-label-mono`}
+              className={`${styles.methodBtn} ${method === "magiclink" ? styles.methodBtnActive : ""
+                } font-label-mono`}
               onClick={() => {
                 setMethod("magiclink");
                 setErrorMessage(null);
@@ -396,14 +393,14 @@ export default function LoginPage() {
                     {method === "magiclink"
                       ? "send"
                       : mode === "signin"
-                      ? "key"
-                      : "bolt"}
+                        ? "key"
+                        : "bolt"}
                   </span>
                   {method === "magiclink"
                     ? "DISPATCH MAGIC LINK"
                     : mode === "signin"
-                    ? "AUTHENTICATE"
-                    : "REGISTER IDENTITY"}
+                      ? "AUTHENTICATE"
+                      : "REGISTER IDENTITY"}
                 </>
               )}
             </button>
@@ -472,7 +469,7 @@ export default function LoginPage() {
               <span>SUPABASE AUTH: ACTIVE</span>
             </div>
             <div className={styles.version}>
-              <OrbitPulse size={8} gold />
+              <OrbitPulse size={6} gold />
               <span>ENCRYPTED PROTOCOL</span>
             </div>
           </div>
