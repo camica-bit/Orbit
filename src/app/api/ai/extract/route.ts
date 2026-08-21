@@ -6,20 +6,39 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 function buildPrompt(contextSummary?: string, existingTasksSummary?: string): string {
   const nowStr = new Date().toLocaleString("en-US", { dateStyle: "full", timeStyle: "short" });
   return `You are Orbit, an AI-powered personal operating environment and autonomous scheduler.
-Extract actionable tasks and events from the user's natural language input, scheduling them accurately.
+Your objective is to extract actionable tasks and events from the user's input, scheduling them accurately while reasoning over their personal context and constraints.
 
 CURRENT SYSTEM TIME & DATE:
 ${nowStr}
 
-${contextSummary ? `USER'S PERSONAL ORBIT CONTEXT (Recurring Commitments & Rhythms):\n${contextSummary}\n` : ""}
-${existingTasksSummary ? `EXISTING SCHEDULED TASKS FOR TODAY:\n${existingTasksSummary}\n` : ""}
+${
+  contextSummary
+    ? `USER'S PERSONAL CONTEXT & CONSTRAINTS:
+The following items represent the user's active commitments, routines, daily rhythms, habits, and preferences stored in Orbit. Account for ALL of them as real-world scheduling constraints:
+${contextSummary}
+`
+    : ""
+}
+${
+  existingTasksSummary
+    ? `EXISTING SCHEDULED TASKS FOR TODAY:
+${existingTasksSummary}
+`
+    : ""
+}
 
-CRITICAL SCHEDULING RULES:
-1. "scheduled_time" MUST strictly be a standard 12-hour clock time (e.g. "10:00 AM", "2:30 PM", "6:00 PM") or null.
-2. NEVER output relative or vague phrases like "After lecture", "Morning", "After class", "Later", or "Evening" in "scheduled_time".
-3. If the user mentions a relative timing (e.g. "after today's lecture", "before gym", "after lunch", "after meeting"), you MUST resolve it against the User's Personal Context and Existing Tasks:
-   - Example: If the context says "classes everyday from 8 am to 10 am", and user says "Get a haircut after today's lecture", set "scheduled_time": "10:00 AM", "type": "fixed", and "ai_rationale": "Scheduled right after your daily lecture ending at 10:00 AM."
-4. If no specific clock time is mentioned and cannot be derived from context, set "scheduled_time": null and "type": "flexible".
+REASONING & SCHEDULING GUIDELINES:
+1. Dynamic Context & Constraint Accounting:
+   - Carefully evaluate the user's input against ALL provided personal context constraints.
+   - When the user asks to schedule a task in relation to any daily routine, rhythm, event, or commitment (e.g., "after X", "before Y"), locate that item in their Personal Context and derive the exact clock time accordingly.
+   - For activities scheduled after a commitment/routine, use the end time of that commitment.
+   - For activities scheduled before a commitment/routine, ensure the task is set to conclude before that commitment begins.
+   - Respect user rhythms, routines, and quiet hours without overlap unless explicitly requested.
+2. Output Specifications:
+   - "scheduled_time" MUST strictly be a standard 12-hour clock time (e.g. "5:00 PM", "10:00 AM", "2:30 PM") or null if the task is completely flexible.
+   - NEVER output relative or placeholder text in "scheduled_time".
+   - "type" MUST be "fixed" if scheduled at a specific clock time, "flexible" if it can happen anytime, or "informational" for notes/checklists.
+   - "ai_rationale" MUST be a concise explanation describing how the user's personal context or constraints guided the scheduled time and priority.
 
 Return ONLY a valid JSON array of task objects matching this schema:
 [
@@ -28,10 +47,10 @@ Return ONLY a valid JSON array of task objects matching this schema:
     "description": "Optional detail or null",
     "estimated_mins": 30, // integer minutes
     "type": "fixed", // strictly one of: "fixed", "flexible", "informational"
-    "scheduled_time": "10:00 AM", // standard 12-hour clock format (e.g. "10:00 AM", "2:30 PM") or null
-    "icon": "content_cut", // Material symbol name (e.g. content_cut, code, fitness_center, book, school, sports_motorsports, task_alt, work, restaurant, local_cafe)
+    "scheduled_time": "5:00 PM", // standard 12-hour clock format (e.g. "5:00 PM", "10:00 AM") or null
+    "icon": "task_alt", // Material symbol name matching the activity
     "meta": "30 min", // Short duration tag
-    "ai_rationale": "One concise sentence explaining how/why Orbit scheduled this",
+    "ai_rationale": "Scheduled based on personal context constraints",
     "priority": 7 // integer 1-10
   }
 ]
@@ -54,7 +73,7 @@ export type ExtractedTask = {
 export function normalizeClockTime(timeStr: string): string | null {
   if (!timeStr) return null;
   const trimmed = timeStr.trim();
-  // 12-hour format e.g. 10:00 AM, 10 AM, 10:00am
+  // 12-hour format e.g. 10:00 AM, 10 AM, 10:00am, 5pm
   const match12 = trimmed.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/i);
   if (match12) {
     const h = parseInt(match12[1], 10);
@@ -62,7 +81,7 @@ export function normalizeClockTime(timeStr: string): string | null {
     const mer = match12[3].toUpperCase();
     return `${h}:${m} ${mer}`;
   }
-  // 24-hour format e.g. 14:00, 08:30
+  // 24-hour format e.g. 14:00, 08:30, 17:00
   const match24 = trimmed.match(/^([01]?\d|2[0-3]):([0-5]\d)$/);
   if (match24) {
     let h = parseInt(match24[1], 10);
@@ -77,83 +96,29 @@ export function normalizeClockTime(timeStr: string): string | null {
 
 export function resolveTimeToClock(
   rawTimeOrText: string | null | undefined,
-  contextDirectives: string[],
+  contextDirectives: string[] = [],
   existingTasks: { title: string; scheduled_time?: string | null }[] = []
 ): { time: string | null; rationale?: string } {
   if (!rawTimeOrText) return { time: null };
 
-  // First check if it's already a valid clock time
+  // Direct valid clock time
   const directNorm = normalizeClockTime(rawTimeOrText);
   if (directNorm) return { time: directNorm };
 
-  // Try to parse relative references against context
-  const lower = rawTimeOrText.toLowerCase();
-  for (const ctx of contextDirectives) {
-    const ctxLower = ctx.toLowerCase();
-    if (
-      (lower.includes("class") || lower.includes("lecture") || lower.includes("study") || lower.includes("school")) &&
-      (ctxLower.includes("class") || ctxLower.includes("lecture") || ctxLower.includes("study") || ctxLower.includes("school"))
-    ) {
-      const match = ctx.match(/(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*(?:to|-)\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)/i);
-      if (match) {
-        let endRaw = match[2].trim();
-        if (!/(am|pm)/i.test(endRaw) && /(am|pm)/i.test(match[1])) {
-          const m1 = match[1].match(/(am|pm)/i);
-          if (m1) endRaw += " " + m1[0];
-        }
-        const parsed = normalizeClockTime(endRaw);
-        if (parsed) return { time: parsed, rationale: `Scheduled right after your classes based on Orbit context (${parsed}).` };
-      }
-    }
-    if (
-      (lower.includes("gym") || lower.includes("workout") || lower.includes("fitness")) &&
-      (ctxLower.includes("gym") || ctxLower.includes("workout") || ctxLower.includes("fitness"))
-    ) {
-      const match = ctx.match(/(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)\s*(?:to|-)\s*(\d{1,2}(?::\d{2})?\s*(?:am|pm)?)/i);
-      if (match) {
-        let endRaw = match[2].trim();
-        if (!/(am|pm)/i.test(endRaw) && /(am|pm)/i.test(match[1])) {
-          const m1 = match[1].match(/(am|pm)/i);
-          if (m1) endRaw += " " + m1[0];
-        }
-        const parsed = normalizeClockTime(endRaw);
-        if (parsed) return { time: parsed, rationale: `Scheduled after your workout session (${parsed}).` };
-      }
-    }
-  }
-
-  // Try to parse relative references against existing scheduled tasks
-  for (const task of existingTasks) {
-    if (!task.scheduled_time) continue;
-    const taskLower = task.title.toLowerCase();
-    if (lower.includes(taskLower) || (lower.includes("lecture") && taskLower.includes("lecture")) || (lower.includes("meeting") && taskLower.includes("meeting"))) {
-      const parsed = normalizeClockTime(task.scheduled_time);
-      if (parsed) return { time: parsed, rationale: `Scheduled in relation to "${task.title}".` };
-    }
-  }
-
-  // Could not resolve into a real clock time — NEVER return invalid text as scheduled_time
   return { time: null };
 }
 
 function sanitizeTask(
   raw: any,
   fallbackText: string,
-  contextDirectives: string[] = [],
-  existingTasks: { title: string; scheduled_time?: string | null }[] = []
+  _contextDirectives: string[] = [],
+  _existingTasks: { title: string; scheduled_time?: string | null }[] = []
 ): ExtractedTask {
-  let resolved = resolveTimeToClock(raw.scheduled_time, contextDirectives, existingTasks);
-  if (!resolved.time) {
-    // If raw.scheduled_time was not present or couldn't be parsed, try fallbackText
-    const fallbackResolved = resolveTimeToClock(fallbackText, contextDirectives, existingTasks);
-    if (fallbackResolved.time) {
-      resolved = fallbackResolved;
-    }
-  }
+  const directTime = raw.scheduled_time ? normalizeClockTime(String(raw.scheduled_time)) : null;
 
   const validTypes = ["fixed", "flexible", "informational"];
   let type: "fixed" | "flexible" | "informational" = "flexible";
-  if (resolved.time) {
+  if (directTime) {
     type = "fixed";
   } else if (raw.type && validTypes.includes(String(raw.type).toLowerCase())) {
     type = String(raw.type).toLowerCase() as any;
@@ -167,24 +132,25 @@ function sanitizeTask(
     if (pLower.includes("high") || pLower.includes("urgent")) priority = 9;
     else if (pLower.includes("low")) priority = 3;
   }
-  if (resolved.time && priority < 7) priority = 8;
+  if (directTime && priority < 7) priority = 8;
 
   let mins = 30;
   if (typeof raw.estimated_mins === "number" && raw.estimated_mins > 0) {
     mins = Math.round(raw.estimated_mins);
   }
 
-  let rationale = raw.ai_rationale ? String(raw.ai_rationale).trim() : "Added via Orbit AI directive.";
-  if (resolved.rationale && (!raw.ai_rationale || raw.ai_rationale.includes("Added via"))) {
-    rationale = resolved.rationale;
-  }
+  const rationale = raw.ai_rationale
+    ? String(raw.ai_rationale).trim()
+    : directTime
+    ? `Scheduled for ${directTime} based on your Orbit schedule.`
+    : "Added to your Orbit workflow.";
 
   return {
     title: raw.title ? String(raw.title).trim() : fallbackText.slice(0, 60),
     description: raw.description ? String(raw.description).trim() : null,
     estimated_mins: mins,
     type,
-    scheduled_time: resolved.time,
+    scheduled_time: directTime,
     icon: raw.icon ? String(raw.icon).trim() : "task_alt",
     meta: raw.meta ? (typeof raw.meta === "object" ? `${mins} min` : String(raw.meta).trim()) : `${mins} min`,
     ai_rationale: rationale,
@@ -269,7 +235,7 @@ async function callGemini(
     return localFallback(text, contextDirectives, existingTasks);
   }
 
-  const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-1.5-flash"];
+  const models = ["gemini-2.0-flash", "gemini-1.5-flash"];
 
   for (const model of models) {
     try {
