@@ -1,4 +1,3 @@
-import StatusChip from "@/components/shared/StatusChip";
 import OrbitPulse from "@/components/shared/OrbitPulse";
 import DitherDivider from "@/components/shared/DitherDivider";
 import styles from "./HeroCard.module.css";

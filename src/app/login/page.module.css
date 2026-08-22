@@ -187,6 +187,14 @@
   box-shadow: 0 0 8px rgba(200, 200, 176, 0.25);
 }
 
+/* The rule above is a colour-and-glow change only, and `.input` sets
+   `outline: none`, so keyboard users had no ring on the login form at all.
+   Ring the whole box rather than the bare field inside its padding. */
+.inputBox:has(:focus-visible) {
+  outline: 2px solid var(--secondary);
+  outline-offset: 2px;
+}
+
 .inputPrompt {
   color: var(--secondary);
   font-family: var(--font-label-mono), monospace;

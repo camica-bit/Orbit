@@ -6,9 +6,20 @@ interface TranscriptionBoxProps {
   text: string;
   interimText?: string;
   isListening: boolean;
+  /**
+   * Provided = the captured text becomes an editable field whenever the mic is
+   * off. Without it there was no way to correct a misheard word — or to enter
+   * anything at all in a browser with no Speech API.
+   */
+  onTextChange?: (text: string) => void;
 }
 
-export default function TranscriptionBox({ text, interimText = "", isListening }: TranscriptionBoxProps) {
+export default function TranscriptionBox({
+  text,
+  interimText = "",
+  isListening,
+  onTextChange,
+}: TranscriptionBoxProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom as text grows
@@ -21,7 +32,14 @@ export default function TranscriptionBox({ text, interimText = "", isListening }
   const isEmpty = !text && !interimText;
 
   return (
-    <div className={`pixel-border ${styles.box}`} role="status" aria-live="polite" aria-label="Transcription">
+    <div
+      className={`pixel-border ${styles.box}`}
+      role="status"
+      // A live region wrapping an editable field re-announces every keystroke,
+      // so it is only live while speech is actually arriving.
+      aria-live={isListening ? "polite" : "off"}
+      aria-label="Transcription"
+    >
       {/* LISTENING / STANDBY badge */}
       <div className={styles.badge}>
         <span
@@ -34,7 +52,17 @@ export default function TranscriptionBox({ text, interimText = "", isListening }
 
       {/* Transcription content */}
       <div ref={scrollRef} className={styles.textScroll}>
-        {isEmpty ? (
+        {!isListening && onTextChange ? (
+          <textarea
+            className={`${styles.editor} font-headline-md`}
+            value={text}
+            onChange={(e) => onTextChange(e.target.value)}
+            placeholder="Speak your schedule, intentions, or anything on your mind..."
+            aria-label="Captured text — edit before sending"
+            spellCheck
+            rows={4}
+          />
+        ) : isEmpty ? (
           <p className={`${styles.placeholder} font-body-md`}>
             Speak your schedule, intentions, or anything on your mind...
           </p>

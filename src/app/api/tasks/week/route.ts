@@ -1,46 +1,61 @@
 import { getAuthUser } from "@/lib/supabase/server";
+import { isoWeekKeys, localDateKey, resolveTimeZone } from "@/lib/time";
+import type { NextRequest } from "next/server";
+
+type WeekTask = {
+  id: string;
+  title: string;
+  estimated_mins: number | null;
+  scheduled_date: string | null;
+  status: string | null;
+  type: string | null;
+};
 
 /**
- * GET /api/tasks/week
- * Returns task counts + hours grouped by weekday for the current ISO week (Mon–Sun) scoped to user.
+ * GET /api/tasks/week?tz=Area/City&offset=0
+ * Returns task counts + hours grouped by weekday for one ISO week (Mon–Sun) scoped to user.
+ * `offset` shifts whole weeks so the client can page backwards and forwards.
+ *
+ * The bucket keys, the query bounds and "which day is today" all come from the
+ * same zone — mixing a local Monday with UTC date keys shifted the whole grid
+ * by a day for anyone behind UTC. `today` is returned so the client never has
+ * to compute it (a prerendered build-time date would disagree with the browser).
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   const { supabase, user } = await getAuthUser();
 
-  // Monday of current ISO week
+  const params = request.nextUrl.searchParams;
+  const timeZone = resolveTimeZone(params.get("tz"));
+  const offset = Math.trunc(Number(params.get("offset")) || 0);
   const now = new Date();
-  const monday = new Date(now);
-  monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
-  monday.setHours(0, 0, 0, 0);
-
-  const sunday = new Date(monday);
-  sunday.setDate(monday.getDate() + 6);
-  sunday.setHours(23, 59, 59, 999);
+  const weekKeys = isoWeekKeys(now, timeZone, offset);
+  const weekStart = weekKeys[0];
+  const today = localDateKey(now, timeZone);
 
   // Initialize empty Mon-Sun buckets
-  const byDate: Record<string, { tasks: any[]; totalMins: number }> = {};
-  for (let i = 0; i < 7; i++) {
-    const d = new Date(monday);
-    d.setDate(monday.getDate() + i);
-    byDate[d.toISOString().slice(0, 10)] = { tasks: [], totalMins: 0 };
+  const byDate: Record<string, { tasks: WeekTask[]; totalMins: number }> = {};
+  for (const key of weekKeys) {
+    byDate[key] = { tasks: [], totalMins: 0 };
   }
 
-  if (!user) {
-    const days = Object.entries(byDate).map(([date, { tasks: t, totalMins }]) => ({
+  const toDays = () =>
+    weekKeys.map((date) => ({
       date,
-      taskCount: t.length,
-      hours: Math.round((totalMins / 60) * 10) / 10,
-      tasks: t,
+      taskCount: byDate[date].tasks.length,
+      hours: Math.round((byDate[date].totalMins / 60) * 10) / 10,
+      tasks: byDate[date].tasks,
     }));
-    return Response.json({ days, weekStart: monday.toISOString().slice(0, 10) });
+
+  if (!user) {
+    return Response.json({ days: toDays(), weekStart, today, offset });
   }
 
   const { data: tasks, error } = await supabase
     .from("tasks")
     .select("id, title, estimated_mins, scheduled_date, status, type")
     .eq("user_id", user.id)
-    .gte("scheduled_date", monday.toISOString().slice(0, 10))
-    .lte("scheduled_date", sunday.toISOString().slice(0, 10));
+    .gte("scheduled_date", weekStart)
+    .lte("scheduled_date", weekKeys[6]);
 
   if (error) return Response.json({ error: error.message }, { status: 500 });
 
@@ -52,12 +67,5 @@ export async function GET() {
     }
   }
 
-  const days = Object.entries(byDate).map(([date, { tasks: t, totalMins }]) => ({
-    date,
-    taskCount: t.length,
-    hours: Math.round((totalMins / 60) * 10) / 10,
-    tasks: t,
-  }));
-
-  return Response.json({ days, weekStart: monday.toISOString().slice(0, 10) });
+  return Response.json({ days: toDays(), weekStart, today, offset });
 }

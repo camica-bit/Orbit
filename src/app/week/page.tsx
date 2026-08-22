@@ -3,10 +3,10 @@ import { useState, useEffect, useCallback } from "react";
 import DitherDivider from "@/components/shared/DitherDivider";
 import OrbitPulse from "@/components/shared/OrbitPulse";
 import { useAuth } from "@/context/AuthContext";
+import { clientTimeZone } from "@/lib/time";
 import styles from "./page.module.css";
 
 const WEEK_DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-const TODAY_IDX = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
 
 type DayData = {
   date: string;
@@ -15,26 +15,45 @@ type DayData = {
   tasks: { id: string; title: string; type: string | null; status: string | null }[];
 };
 
-const MAX_HOURS = 8; // scale bar: 8 h = full height
+// Baseline bar scale; a heavier week scales past this so nothing clips silently.
+const BASE_MAX_HOURS = 8;
+
+const LEGEND = [
+  { colour: "var(--error)", label: "Over 6h" },
+  { colour: "var(--secondary)", label: "3–6h" },
+  { colour: "var(--primary)", label: "Under 3h" },
+  { colour: "var(--outline)", label: "Empty" },
+];
 
 export default function WeekPage() {
   const { user } = useAuth();
   const [days, setDays] = useState<DayData[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [weekStart, setWeekStart] = useState<string>("");
+  const [today, setToday] = useState<string>("");
+  const [offset, setOffset] = useState(0);
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/tasks/week");
+      const res = await fetch(
+        `/api/tasks/week?tz=${encodeURIComponent(clientTimeZone())}&offset=${offset}`
+      );
+      if (!res.ok) throw new Error(String(res.status));
       const json = await res.json();
       setDays(json.days ?? []);
       setWeekStart(json.weekStart ?? "");
+      setToday(json.today ?? "");
+      setError(false);
+    } catch {
+      setDays([]);
+      setError(true);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [offset]);
 
   useEffect(() => {
     load();
@@ -45,7 +64,14 @@ export default function WeekPage() {
     : "";
 
   const totalTasks = days.reduce((s, d) => s + d.taskCount, 0);
-  const totalHours = Math.round(days.reduce((s, d) => s + d.hours, 10) * 10) / 10;
+  const totalHours = Math.round(days.reduce((s, d) => s + d.hours, 0) * 10) / 10;
+  const maxHours = Math.max(BASE_MAX_HOURS, ...days.map((d) => d.hours));
+
+  // Paging weeks invalidates an index-based selection.
+  const goToWeek = (next: number) => {
+    setSelectedDay(null);
+    setOffset(next);
+  };
 
   return (
     <div className={styles.page}>
@@ -53,11 +79,39 @@ export default function WeekPage() {
         <div className={styles.headerRow}>
           <OrbitPulse size={12} />
           <h1 className={`${styles.title} font-headline-xl`}>Weekly Flow</h1>
-          {weekLabel && (
-            <span className={`${styles.weekLabel} font-label-mono`}>
-              WK: {weekLabel}
+          <div className={styles.weekNav}>
+            <button
+              type="button"
+              className={styles.navBtn}
+              onClick={() => goToWeek(offset - 1)}
+              disabled={loading}
+              aria-label="Previous week"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 20 }}>chevron_left</span>
+            </button>
+            <span className={`${styles.weekLabel} font-label-mono`} style={{ marginLeft: 0 }}>
+              {offset === 0 ? "WK: " : ""}{weekLabel || "—"}
             </span>
-          )}
+            <button
+              type="button"
+              className={styles.navBtn}
+              onClick={() => goToWeek(offset + 1)}
+              disabled={loading}
+              aria-label="Next week"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 20 }}>chevron_right</span>
+            </button>
+            {offset !== 0 && (
+              <button
+                type="button"
+                className={styles.navBtn}
+                onClick={() => goToWeek(0)}
+                aria-label="Back to this week"
+              >
+                <span className="material-symbols-outlined" style={{ fontSize: 18 }}>today</span>
+              </button>
+            )}
+          </div>
         </div>
         <p className={`${styles.subtitle} font-body-lg`}>
           Your cognitive load and momentum mapped across the week.
@@ -65,8 +119,24 @@ export default function WeekPage() {
         <DitherDivider style={{ marginTop: 20 }} />
       </header>
 
+      {error && (
+        <div className={`pixel-border ${styles.detailPanel}`} role="alert">
+          <p className="font-body-md" style={{ color: "var(--error)" }}>
+            Couldn&apos;t load this week.{" "}
+            <button
+              type="button"
+              className={styles.navBtn}
+              style={{ display: "inline", textDecoration: "underline" }}
+              onClick={load}
+            >
+              Try again
+            </button>
+          </p>
+        </div>
+      )}
+
       {/* Summary row */}
-      {!loading && (
+      {!loading && !error && (
         <div className={styles.summaryRow}>
           <div className={`pixel-border ${styles.summaryCard}`}>
             <span className={`${styles.summaryNum} font-headline-md`}>{totalTasks}</span>
@@ -95,8 +165,8 @@ export default function WeekPage() {
               </div>
             ))
           : days.map((dayData, i) => {
-              const isToday = i === TODAY_IDX;
-              const barH = Math.max((dayData.hours / MAX_HOURS) * 90, dayData.taskCount > 0 ? 8 : 4);
+              const isToday = dayData.date === today;
+              const barH = Math.max((dayData.hours / maxHours) * 90, dayData.taskCount > 0 ? 8 : 4);
               const colour =
                 dayData.hours > 6 ? "var(--error)" :
                 dayData.hours > 3 ? "var(--secondary)" :
@@ -105,16 +175,15 @@ export default function WeekPage() {
               const isSelected = selectedDay === i;
 
               return (
-                <div
+                <button
+                  type="button"
                   key={dayData.date}
                   className={`pixel-border ${styles.dayCard}
                     ${isToday ? styles.dayCardToday : ""}
                     ${isSelected ? styles.dayCardSelected : ""}`}
                   onClick={() => setSelectedDay(isSelected ? null : i)}
-                  role="button"
-                  tabIndex={0}
-                  aria-label={`${WEEK_DAYS[i]}: ${dayData.taskCount} tasks`}
-                  onKeyDown={(e) => e.key === "Enter" && setSelectedDay(isSelected ? null : i)}
+                  aria-pressed={isSelected}
+                  aria-label={`${WEEK_DAYS[i]}: ${dayData.taskCount} tasks, ${dayData.hours} hours`}
                 >
                   <span
                     className={`${styles.dayLabel} font-label-mono`}
@@ -141,14 +210,33 @@ export default function WeekPage() {
                       </span>
                       <span className={`${styles.statLabel} font-label-mono`}>tasks</span>
                       <span className={`${styles.statHours} font-label-mono`}>{dayData.hours}h</span>
+                      {dayData.hours > BASE_MAX_HOURS && (
+                        <span className={`${styles.overflowMark} font-label-mono`}>OVERLOAD</span>
+                      )}
                     </div>
                   ) : (
                     <div className={`${styles.restDay} font-label-mono`}>REST</div>
                   )}
-                </div>
+                </button>
               );
             })}
       </section>
+
+      {!loading && !error && (
+        <div className={styles.legend}>
+          {LEGEND.map((l) => (
+            <span key={l.label} className={`${styles.legendItem} font-label-mono`}>
+              <span className={styles.legendSwatch} style={{ backgroundColor: l.colour }} />
+              {l.label}
+            </span>
+          ))}
+          {maxHours > BASE_MAX_HOURS && (
+            <span className={`${styles.legendItem} font-label-mono`}>
+              Bars scaled to {maxHours}h
+            </span>
+          )}
+        </div>
+      )}
 
       {/* Task detail panel — shown when a day is selected */}
       {selectedDay !== null && !loading && days[selectedDay] && (
@@ -158,6 +246,7 @@ export default function WeekPage() {
               {WEEK_DAYS[selectedDay]} — {days[selectedDay].tasks.length} task{days[selectedDay].tasks.length !== 1 ? "s" : ""}
             </h3>
             <button
+              type="button"
               className={styles.detailClose}
               onClick={() => setSelectedDay(null)}
               aria-label="Close"

@@ -29,3 +29,24 @@
   min-height: 100dvh;
 }
 
+/* Off-screen until focused, rather than display:none — a hidden element can't
+   receive focus, which is the one thing a skip link needs to do. */
+.skipLink {
+  position: absolute;
+  top: 8px;
+  left: -9999px;
+  z-index: 200;
+  padding: 10px 16px;
+  background-color: var(--secondary);
+  color: var(--on-secondary);
+  font-size: var(--text-label-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.skipLink:focus-visible {
+  left: 8px;
+  outline: 2px solid var(--on-secondary);
+  outline-offset: 2px;
+}
+

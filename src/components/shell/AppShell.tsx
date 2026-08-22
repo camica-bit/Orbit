@@ -1,5 +1,4 @@
 "use client";
-import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { AuthProvider } from "@/context/AuthContext";
 import SideNav from "./SideNav";
@@ -12,22 +11,35 @@ import styles from "./AppShell.module.css";
 const FULLSCREEN_ROUTES = ["/focus", "/listen", "/login", "/auth"];
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
-  const [activeNav, setActiveNav] = useState("today");
   const pathname = usePathname();
   const isFullscreen = FULLSCREEN_ROUTES.some((r) => pathname.startsWith(r));
 
   return (
     <AuthProvider>
       <div className={styles.shell}>
-        {!isFullscreen && <SideNav activeNav={activeNav} onNavChange={setActiveNav} />}
+        {/* Without this, reaching the page content meant tabbing the whole
+            sidebar on every navigation. Visible only when focused. */}
+        {!isFullscreen && (
+          <a href="#main-content" className={styles.skipLink}>
+            Skip to content
+          </a>
+        )}
+
+        {!isFullscreen && <SideNav />}
         {!isFullscreen && <TopBar />}
 
-        <div className={isFullscreen ? styles.contentFullscreen : styles.content}>
-          {children}
-        </div>
+        {/* The fullscreen routes each render their own <main>, and a document
+            may only have one. */}
+        {isFullscreen ? (
+          <div className={styles.contentFullscreen}>{children}</div>
+        ) : (
+          <main id="main-content" className={styles.content}>
+            {children}
+          </main>
+        )}
 
         {!isFullscreen && <InputBar />}
-        {!isFullscreen && <BottomNav activeNav={activeNav} onNavChange={setActiveNav} />}
+        {!isFullscreen && <BottomNav />}
       </div>
     </AuthProvider>
   );

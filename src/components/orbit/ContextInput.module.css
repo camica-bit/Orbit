@@ -23,13 +23,18 @@
   flex: 1;
   background: transparent;
   border: none;
-  outline: none;
   color: var(--on-surface);
   font-family: var(--font-body);
   font-size: var(--text-body-lg);
   line-height: var(--lh-body-lg);
 }
 .input::placeholder { color: var(--on-surface-variant); }
+
+/* `outline: none` used to leave keyboard users with no focus cue at all. */
+.input:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
 
 .submitBtn {
   padding: 8px 20px;
@@ -43,4 +48,21 @@
   color: var(--on-surface-variant);
   margin-top: 10px;
   margin-left: 4px;
+}
+
+.eventRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 14px;
+  margin-left: 4px;
+  color: var(--on-surface-variant);
+}
+
+.dateInput {
+  width: fit-content;
+  padding: 8px 12px;
+  background-color: var(--surface-container);
+  color: var(--on-surface);
+  font-family: var(--font-mono);
 }

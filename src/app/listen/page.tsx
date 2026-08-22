@@ -1,35 +1,93 @@
 "use client";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import VoiceCore from "@/components/listen/VoiceCore";
 import TranscriptionBox from "@/components/listen/TranscriptionBox";
 import AudioBars from "@/components/listen/AudioBars";
+import { clientTimeZone } from "@/lib/time";
+import { notifyTasksChanged } from "@/lib/taskEvents";
 import styles from "./page.module.css";
 
-type ListenState = "idle" | "listening" | "processing" | "unsupported";
+type ListenState = "idle" | "listening" | "processing";
+
+/**
+ * The slice of the Web Speech API this page uses. It is not in `lib.dom.d.ts`,
+ * which is why every handler here used to be typed `any`.
+ */
+type SpeechResult = { isFinal: boolean; 0: { transcript: string } };
+interface SpeechRecognitionLike {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onstart: (() => void) | null;
+  onresult: ((e: { results: ArrayLike<SpeechResult> }) => void) | null;
+  onspeechend: (() => void) | null;
+  onend: (() => void) | null;
+  onerror: ((e: { error: string }) => void) | null;
+  start(): void;
+  stop(): void;
+}
+
+function speechRecognitionCtor(): (new () => SpeechRecognitionLike) | undefined {
+  const w = window as unknown as {
+    SpeechRecognition?: new () => SpeechRecognitionLike;
+    webkitSpeechRecognition?: new () => SpeechRecognitionLike;
+  };
+  return w.SpeechRecognition ?? w.webkitSpeechRecognition;
+}
+
+// Nothing to subscribe to — API support never changes for a loaded document.
+const noSubscribe = () => () => {};
 
 export default function ListenPage() {
   const router = useRouter();
+  /**
+   * Browser-only value. `useSyncExternalStore` is React's own way to read one
+   * without a hydration mismatch or a setState inside an effect; the server
+   * snapshot assumes support so the mic UI isn't hidden mid-hydration.
+   */
+  const speechSupported = useSyncExternalStore(
+    noSubscribe,
+    () => speechRecognitionCtor() !== undefined,
+    () => true
+  );
+
   const [listenState, setListenState] = useState<ListenState>("idle");
   const [transcript, setTranscript] = useState("");
   const [interimText, setInterimText] = useState("");
   const [audioLevel, setAudioLevel] = useState(0);
-  const recognitionRef = useRef<any>(null);
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const animFrameRef = useRef<number>(0);
-  const streamRef = useRef<MediaStream | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // Check Speech API support
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const hasAPI = "SpeechRecognition" in window || "webkitSpeechRecognition" in window;
-      if (!hasAPI) setListenState("unsupported");
-    }
-    return () => stopAudioAnalysis();
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const animFrameRef = useRef(0);
+  const streamRef = useRef<MediaStream | null>(null);
+  // Mirrors `transcript` so a new recognition run can append to what was
+  // already captured without rebuilding its handlers on every keystroke.
+  const transcriptRef = useRef("");
+
+  const commitTranscript = useCallback((text: string) => {
+    transcriptRef.current = text;
+    setTranscript(text);
   }, []);
 
-  // Audio level analyser for visualizer
+  /** Release the microphone. Declared before the cleanup effect that uses it. */
+  const stopCapture = useCallback(() => {
+    // Only `stopAudioAnalysis` used to run here, so `SpeechRecognition` kept
+    // its own capture alive — the mic stayed hot after navigating away.
+    recognitionRef.current?.stop();
+    recognitionRef.current = null;
+    cancelAnimationFrame(animFrameRef.current);
+    // Closing an already-closed context rejects; nothing to recover from.
+    audioCtxRef.current?.close().catch(() => {});
+    audioCtxRef.current = null;
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    setAudioLevel(0);
+  }, []);
+
+  useEffect(() => stopCapture, [stopCapture]);
+
   const startAudioAnalysis = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -37,13 +95,12 @@ export default function ListenPage() {
       const ctx = new AudioContext();
       const analyser = ctx.createAnalyser();
       analyser.fftSize = 32;
-      const source = ctx.createMediaStreamSource(stream);
-      source.connect(analyser);
+      ctx.createMediaStreamSource(stream).connect(analyser);
       audioCtxRef.current = ctx;
-      analyserRef.current = analyser;
 
+      // Hoisted out of `tick` — this used to allocate 60 arrays a second.
+      const data = new Uint8Array(analyser.frequencyBinCount);
       const tick = () => {
-        const data = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(data);
         const avg = data.reduce((a, b) => a + b, 0) / data.length;
         setAudioLevel(avg / 128); // 0..1
@@ -51,31 +108,29 @@ export default function ListenPage() {
       };
       tick();
     } catch {
-      // mic permission denied or not available — still works visually
+      // Mic permission denied — recognition reports its own error separately.
     }
   }, []);
 
-  const stopAudioAnalysis = () => {
-    cancelAnimationFrame(animFrameRef.current);
-    audioCtxRef.current?.close();
-    streamRef.current?.getTracks().forEach((t) => t.stop());
-    setAudioLevel(0);
-  };
-
-  const setupRecognition = useCallback(() => {
-    const SpeechRecognition =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    const rec = new SpeechRecognition();
+  const startListening = useCallback(() => {
+    const Ctor = speechRecognitionCtor();
+    if (!Ctor) return;
+    const rec = new Ctor();
     rec.continuous = true;
     rec.interimResults = true;
     rec.lang = "en-US";
 
+    // Anything already captured is the base this run appends to. Restarting
+    // the mic used to call setTranscript("") and erase the previous dictation.
+    const base = transcriptRef.current;
+
     rec.onstart = () => {
+      setError(null);
       setListenState("listening");
       startAudioAnalysis();
     };
 
-    rec.onresult = (event: any) => {
+    rec.onresult = (event) => {
       let final = "";
       let interim = "";
       for (let i = 0; i < event.results.length; i++) {
@@ -83,7 +138,7 @@ export default function ListenPage() {
         if (res.isFinal) final += res[0].transcript + " ";
         else interim += res[0].transcript;
       }
-      if (final) setTranscript(final.trim());
+      if (final) commitTranscript(`${base ? `${base} ` : ""}${final.trim()}`);
       setInterimText(interim);
     };
 
@@ -91,70 +146,84 @@ export default function ListenPage() {
 
     rec.onend = () => {
       setListenState((prev) => (prev === "listening" ? "idle" : prev));
-      stopAudioAnalysis();
+      stopCapture();
       setInterimText("");
     };
 
-    rec.onerror = (e: any) => {
-      console.error("Speech recognition error:", e.error);
-      stopAudioAnalysis();
+    rec.onerror = (e) => {
+      stopCapture();
       setListenState("idle");
+      setInterimText("");
+      // "no-speech" and "aborted" are ordinary end-of-dictation outcomes.
+      if (e.error !== "no-speech" && e.error !== "aborted") {
+        setError(
+          e.error === "not-allowed"
+            ? "Microphone access was denied. You can type instead."
+            : `Speech recognition failed (${e.error}). You can type instead.`
+        );
+      }
     };
 
     recognitionRef.current = rec;
-    return rec;
-  }, [startAudioAnalysis]);
-
-  const startListening = useCallback(() => {
-    setTranscript("");
     setInterimText("");
-    const rec = setupRecognition();
     rec.start();
-  }, [setupRecognition]);
+  }, [startAudioAnalysis, commitTranscript, stopCapture]);
 
   const stopListening = useCallback(() => {
-    recognitionRef.current?.stop();
-    stopAudioAnalysis();
+    stopCapture();
     setListenState("idle");
-  }, []);
+  }, [stopCapture]);
 
-  const handleToggle = () => {
+  const handleToggle = useCallback(() => {
     if (listenState === "listening") stopListening();
     else if (listenState === "idle") startListening();
-  };
+  }, [listenState, startListening, stopListening]);
 
   const handleDone = async () => {
-    recognitionRef.current?.stop();
-    stopAudioAnalysis();
+    stopCapture();
+    const text = transcript.trim();
+    if (!text) return;
     setListenState("processing");
+    setError(null);
     try {
-      // Send transcript to Gemini AI pipeline
-      if (transcript.trim()) {
-        await fetch("/api/ai/extract", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text: transcript.trim() }),
-        });
+      const res = await fetch("/api/ai/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // Without the zone the server files tasks against its own calendar day.
+        body: JSON.stringify({ text, timeZone: clientTimeZone() }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.error ?? `Extraction failed (${res.status}).`);
       }
-    } catch {
-      // Even on error, navigate home
+    } catch (e) {
+      // This used to navigate home regardless, discarding the transcript with
+      // no message — the recording is unrecoverable once the page unmounts.
+      setError(e instanceof Error ? e.message : "Could not reach Orbit.");
+      setListenState("idle");
+      return;
     }
+    notifyTasksChanged();
     router.push("/");
-    router.refresh();
   };
 
-  // Space key toggle, Escape = exit
+  // Space toggles the mic, Escape leaves.
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.target instanceof HTMLInputElement) return;
-      if (e.code === "Space") { e.preventDefault(); handleToggle(); }
+      // Space belongs to the field while the user is editing the transcript.
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      if (e.code === "Space") {
+        e.preventDefault();
+        handleToggle();
+      }
       if (e.code === "Escape") router.push("/");
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [listenState, handleToggle, router]);
+  }, [handleToggle, router]);
 
   const isListening = listenState === "listening";
+  const isProcessing = listenState === "processing";
 
   return (
     <div className={styles.page}>
@@ -162,21 +231,28 @@ export default function ListenPage() {
       <div className={styles.scanline} aria-hidden="true" />
 
       <main className={styles.main}>
-        {listenState === "unsupported" ? (
+        {!speechSupported && (
           <div className={`pixel-border ${styles.unsupported}`}>
-            <span className="material-symbols-outlined" style={{ fontSize: 32, color: "var(--error)" }}>
+            <span
+              className="material-symbols-outlined"
+              style={{ fontSize: 32, color: "var(--error)" }}
+              aria-hidden="true"
+            >
               mic_off
             </span>
             <div>
-              <p className={`${styles.unsupportedTitle} font-headline-md`}>
-                Voice Not Supported
-              </p>
+              <p className={`${styles.unsupportedTitle} font-headline-md`}>Voice Not Supported</p>
+              {/* Used to say "use the text input below", which AppShell hides on
+                  this route. The box below is now editable, so this is true. */}
               <p className={`${styles.unsupportedSub} font-body-md`}>
-                Use Chrome or Edge for Web Speech API support. Or use the text input below.
+                Use Chrome or Edge for Web Speech API support — or type into the box
+                below and press DONE.
               </p>
             </div>
           </div>
-        ) : (
+        )}
+
+        {speechSupported && (
           <>
             {/* System telemetry bar */}
             <div className={styles.telemetryBar}>
@@ -195,49 +271,81 @@ export default function ListenPage() {
               role="button"
               tabIndex={0}
               aria-label={isListening ? "Stop listening" : "Start listening"}
+              aria-pressed={isListening}
               onKeyDown={(e) => e.key === "Enter" && handleToggle()}
             >
               <VoiceCore isListening={isListening} audioLevel={audioLevel} />
-              <p className={`${styles.tapHint} font-label-mono ${isListening ? styles.tapHintActive : ""}`}>
-                {listenState === "processing" ? "Processing..." : isListening ? "Tap to stop · SPACE" : "Tap to speak · SPACE"}
+              <p
+                className={`${styles.tapHint} font-label-mono ${
+                  isListening ? styles.tapHintActive : ""
+                }`}
+              >
+                {isProcessing
+                  ? "Processing..."
+                  : isListening
+                  ? "Tap to stop · SPACE"
+                  : "Tap to speak · SPACE"}
               </p>
             </div>
 
             {/* Audio bars */}
             <AudioBars isListening={isListening} audioLevel={audioLevel} />
-
-            {/* Transcription box */}
-            <TranscriptionBox
-              text={transcript}
-              interimText={interimText}
-              isListening={isListening}
-            />
-
-            {/* DONE button */}
-            <button
-              id="listen-done-btn"
-              className={`pixel-btn pixel-btn-primary ${styles.doneBtn}`}
-              onClick={handleDone}
-              disabled={!transcript || listenState === "processing"}
-            >
-              {listenState === "processing" ? (
-                <>
-                  <span className="material-symbols-outlined anim-orbit-pulse" style={{ fontSize: 20 }}>
-                    sync
-                  </span>
-                  PROCESSING...
-                </>
-              ) : (
-                <>
-                  <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1", fontSize: 20 }}>
-                    check_circle
-                  </span>
-                  DONE
-                </>
-              )}
-            </button>
           </>
         )}
+
+        {/* Editable whenever the mic is off, so a misheard word can be corrected
+            — and so a browser with no Speech API can still enter something. */}
+        <TranscriptionBox
+          text={transcript}
+          interimText={interimText}
+          isListening={isListening}
+          onTextChange={isProcessing ? undefined : commitTranscript}
+        />
+
+        {error && (
+          <div className={`pixel-border ${styles.error}`} role="alert">
+            <span
+              className="material-symbols-outlined"
+              style={{ fontSize: 20, color: "var(--error)" }}
+              aria-hidden="true"
+            >
+              error
+            </span>
+            <span className="font-body-md">{error}</span>
+          </div>
+        )}
+
+        {/* DONE button */}
+        <button
+          id="listen-done-btn"
+          className={`pixel-btn pixel-btn-primary ${styles.doneBtn}`}
+          onClick={handleDone}
+          disabled={!transcript.trim() || isProcessing}
+        >
+          {isProcessing ? (
+            <>
+              <span
+                className="material-symbols-outlined anim-orbit-pulse"
+                style={{ fontSize: 20 }}
+                aria-hidden="true"
+              >
+                sync
+              </span>
+              PROCESSING...
+            </>
+          ) : (
+            <>
+              <span
+                className="material-symbols-outlined"
+                style={{ fontVariationSettings: "'FILL' 1", fontSize: 20 }}
+                aria-hidden="true"
+              >
+                check_circle
+              </span>
+              {error ? "RETRY" : "DONE"}
+            </>
+          )}
+        </button>
 
         <div className={styles.keyHints}>
           <span className={`${styles.keyBadge} font-label-mono`}>SPACE</span>

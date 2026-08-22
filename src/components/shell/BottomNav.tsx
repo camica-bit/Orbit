@@ -1,35 +1,21 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { NAV_ITEMS, isActiveHref } from "./navItems";
 import styles from "./BottomNav.module.css";
 
-const TABS = [
-  { id: "today",    label: "Today",    icon: "target",             href: "/" },
-  { id: "week",     label: "Week",     icon: "calendar_view_week", href: "/week" },
-  { id: "orbit",    label: "Context",  icon: "psychology_alt",     href: "/orbit" },
-  { id: "calendar", label: "Calendar", icon: "calendar_month",     href: "/calendar" },
-];
-
-interface BottomNavProps {
-  activeNav: string;
-  onNavChange: (id: string) => void;
-}
-
-export default function BottomNav({ activeNav, onNavChange }: BottomNavProps) {
+export default function BottomNav() {
   const pathname = usePathname();
-  const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   return (
     <nav className={styles.bottomnav} aria-label="Mobile navigation">
-      {TABS.map((tab) => {
-        const active = isActive(tab.href);
+      {NAV_ITEMS.map((tab) => {
+        const active = isActiveHref(pathname, tab.href);
         return (
           <Link
             key={tab.id}
             href={tab.href}
             className={`${styles.tab} ${active ? styles.tabActive : ""}`}
-            onClick={() => onNavChange(tab.id)}
             aria-current={active ? "page" : undefined}
           >
             <span
@@ -38,7 +24,7 @@ export default function BottomNav({ activeNav, onNavChange }: BottomNavProps) {
             >
               {tab.icon}
             </span>
-            <span className={`${styles.tabLabel} font-label-mono`}>{tab.label}</span>
+            <span className={`${styles.tabLabel} font-label-mono`}>{tab.short}</span>
           </Link>
         );
       })}

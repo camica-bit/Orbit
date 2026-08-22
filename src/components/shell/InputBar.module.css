@@ -47,11 +47,16 @@
   flex: 1;
   background: transparent;
   border: none;
-  outline: none;
   color: var(--on-surface);
   font-family: var(--font-mono);
   font-size: var(--text-label-mono);
   letter-spacing: var(--ls-label-mono);
+}
+
+/* `outline: none` used to leave keyboard users with no focus cue at all. */
+.input:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
 }
 
 .input::placeholder {
@@ -91,4 +96,18 @@
 .input:disabled {
   opacity: 0.7;
   cursor: not-allowed;
+}
+
+/* Read by screen readers, invisible on screen. `display: none` would not be
+   announced, so the node has to stay in the layout. */
+.srStatus {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

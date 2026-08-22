@@ -26,7 +26,7 @@ export type Database = {
           is_major_event: boolean | null
           tags: string[] | null
           updated_at: string | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           bg_color?: string | null
@@ -39,7 +39,7 @@ export type Database = {
           is_major_event?: boolean | null
           tags?: string[] | null
           updated_at?: string | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           bg_color?: string | null
@@ -52,7 +52,7 @@ export type Database = {
           is_major_event?: boolean | null
           tags?: string[] | null
           updated_at?: string | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -66,7 +66,7 @@ export type Database = {
           streak: number | null
           task_id: string | null
           task_title: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           actual_mins?: number | null
@@ -77,7 +77,7 @@ export type Database = {
           streak?: number | null
           task_id?: string | null
           task_title: string
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           actual_mins?: number | null
@@ -88,7 +88,7 @@ export type Database = {
           streak?: number | null
           task_id?: string | null
           task_title?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: [
           {
@@ -116,7 +116,7 @@ export type Database = {
           status: string | null
           title: string
           type: string | null
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           ai_rationale?: string | null
@@ -133,7 +133,7 @@ export type Database = {
           status?: string | null
           title: string
           type?: string | null
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           ai_rationale?: string | null
@@ -150,7 +150,7 @@ export type Database = {
           status?: string | null
           title?: string
           type?: string | null
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }
@@ -160,21 +160,21 @@ export type Database = {
           extracted_tasks: Json | null
           id: string
           raw_text: string
-          user_id: string | null
+          user_id: string
         }
         Insert: {
           created_at?: string | null
           extracted_tasks?: Json | null
           id?: string
           raw_text: string
-          user_id?: string | null
+          user_id: string
         }
         Update: {
           created_at?: string | null
           extracted_tasks?: Json | null
           id?: string
           raw_text?: string
-          user_id?: string | null
+          user_id?: string
         }
         Relationships: []
       }

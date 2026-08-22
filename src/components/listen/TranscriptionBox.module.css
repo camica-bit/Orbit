@@ -63,6 +63,28 @@
   line-height: 1.6;
 }
 
+/* Editable view — matches .finalText so switching modes doesn't reflow. */
+.editor {
+  width: 100%;
+  background: transparent;
+  border: none;
+  resize: none;
+  color: var(--on-surface);
+  font-size: 22px;
+  line-height: 1.5;
+}
+
+.editor::placeholder {
+  color: var(--on-surface-variant);
+  font-style: italic;
+  opacity: 0.7;
+}
+
+.editor:focus-visible {
+  outline: 2px solid var(--secondary);
+  outline-offset: 4px;
+}
+
 .finalText {
   color: var(--on-surface);
   font-size: 22px;

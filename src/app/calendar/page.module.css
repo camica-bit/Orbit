@@ -24,50 +24,11 @@
   max-width: 560px;
 }
 
-/* Sources */
-.sources {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-bottom: 40px;
-}
+/* The `.source*` rules went with the provider cards and their handler-less
+   "Connect" buttons. */
 
-.sourceCard {
-  background-color: var(--surface-container);
-  padding: 20px 24px;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  transition: background-color 0.15s;
-}
-.sourceCard:hover { background-color: var(--surface-container-high); }
-
-.sourceInfo {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.sourceName {
-  color: var(--on-surface);
-  font-weight: 500;
-}
-
-.sourceStatus {
-  color: var(--outline);
-  font-size: var(--text-label-mono);
-  letter-spacing: 0.08em;
-}
-
-.sourceBtn {
-  padding: 8px 20px;
-  font-size: 11px;
-  letter-spacing: 0.1em;
-}
-
-/* Coming soon */
-.comingSoon {
+/* Not-connected notice */
+.notice {
   background-color: var(--surface-container);
   padding: 20px 24px;
   display: flex;
@@ -75,7 +36,7 @@
   gap: 16px;
 }
 
-.csTitle {
+.noticeTitle {
   color: var(--secondary);
   font-size: var(--text-label-mono);
   letter-spacing: 0.08em;
@@ -83,7 +44,17 @@
   margin-bottom: 4px;
 }
 
-.csSub {
+.noticeBody {
   color: var(--on-surface-variant);
   font-size: 14px;
+  max-width: 60ch;
+}
+
+.noticeBack {
+  margin-top: 14px;
+}
+.noticeBack a {
+  color: var(--primary);
+  font-size: var(--text-label-mono);
+  letter-spacing: 0.08em;
 }

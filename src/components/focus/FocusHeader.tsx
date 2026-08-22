@@ -1,14 +1,8 @@
 "use client";
-import Link from "next/link";
+import { formatDuration } from "@/lib/time";
 import styles from "./FocusHeader.module.css";
 
 type SessionState = "idle" | "active" | "paused" | "complete";
-
-function formatTime(seconds: number) {
-  const m = Math.floor(seconds / 60).toString().padStart(2, "0");
-  const s = (seconds % 60).toString().padStart(2, "0");
-  return `${m}:${s}`;
-}
 
 interface FocusHeaderProps {
   state: SessionState;
@@ -38,7 +32,7 @@ export default function FocusHeader({ state, elapsed, progress, estimatedMins, o
 
         {state !== "idle" && (
           <div className={styles.timerWrap}>
-            <span className={`${styles.timer} font-headline-md`}>{formatTime(elapsed)}</span>
+            <span className={`${styles.timer} font-headline-md`}>{formatDuration(elapsed)}</span>
             <span className={`${styles.timerEst} font-label-mono`}>/ {estimatedMins}:00</span>
           </div>
         )}

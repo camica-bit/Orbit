@@ -173,6 +173,13 @@
 .terminal-input:focus {
   border-color: var(--primary);
 }
+/* `outline: none` above killed the ring on every real input wearing this class
+   (ContextInput's date field, PixelDialog's text field). The border-colour
+   change alone is a colour-only cue, which WCAG 1.4.1 doesn't accept. */
+.terminal-input:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+}
 .terminal-input::placeholder {
   color: var(--outline);
   font-style: italic;

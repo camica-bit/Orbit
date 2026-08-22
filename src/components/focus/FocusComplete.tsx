@@ -1,22 +1,25 @@
+import { formatDuration } from "@/lib/time";
 import styles from "./FocusComplete.module.css";
-
-function formatTime(seconds: number) {
-  const m = Math.floor(seconds / 60).toString().padStart(2, "0");
-  const s = (seconds % 60).toString().padStart(2, "0");
-  return `${m}:${s}`;
-}
 
 interface Task { title: string; estimatedMins: number; }
 
 interface FocusCompleteProps {
   task: Task;
   elapsed: number;
+  /** Consecutive-day streak as computed by the server on save. */
+  streak: number;
   onRestart: () => void;
   onExit: () => void;
 }
 
-export default function FocusComplete({ task, elapsed, onRestart, onExit }: FocusCompleteProps) {
-  const efficiency = elapsed > 0 ? Math.round((task.estimatedMins * 60 / elapsed) * 100) : 100;
+// A 20-second session on a 30-minute task is not 9000% efficient.
+const EFFICIENCY_CAP = 200;
+
+export default function FocusComplete({ task, elapsed, streak, onRestart, onExit }: FocusCompleteProps) {
+  const efficiency =
+    elapsed > 0
+      ? Math.min(Math.round((task.estimatedMins * 60 / elapsed) * 100), EFFICIENCY_CAP)
+      : 100;
 
   return (
     <div className={styles.wrap}>
@@ -38,7 +41,7 @@ export default function FocusComplete({ task, elapsed, onRestart, onExit }: Focu
       {/* Stats */}
       <div className={styles.stats}>
         <div className={`pixel-border ${styles.stat}`}>
-          <span className={`${styles.statNum} font-headline-lg`}>{formatTime(elapsed)}</span>
+          <span className={`${styles.statNum} font-headline-lg`}>{formatDuration(elapsed)}</span>
           <span className={`${styles.statLabel} font-label-mono`}>Time Logged</span>
         </div>
         <div className={`pixel-border ${styles.stat}`}>
@@ -50,8 +53,10 @@ export default function FocusComplete({ task, elapsed, onRestart, onExit }: Focu
           <span className={`${styles.statLabel} font-label-mono`}>Efficiency</span>
         </div>
         <div className={`pixel-border ${styles.stat}`}>
-          <span className={`${styles.statNum} font-headline-lg`}>+1</span>
-          <span className={`${styles.statLabel} font-label-mono`}>Streak</span>
+          <span className={`${styles.statNum} font-headline-lg`}>{streak}</span>
+          <span className={`${styles.statLabel} font-label-mono`}>
+            Day Streak
+          </span>
         </div>
       </div>
 

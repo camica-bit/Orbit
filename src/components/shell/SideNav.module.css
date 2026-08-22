@@ -137,14 +137,6 @@
   text-transform: lowercase;
 }
 
-.syncBtn {
-  width: 100%;
-  margin-bottom: 12px;
-  font-size: var(--text-label-mono);
-  letter-spacing: 0.1em;
-  padding: 10px 16px;
-}
-
 .footerLinks {
   display: flex;
   justify-content: space-between;

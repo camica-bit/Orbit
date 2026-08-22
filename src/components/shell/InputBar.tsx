@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import BlinkCursor from "@/components/shared/BlinkCursor";
+import { notifyTasksChanged } from "@/lib/taskEvents";
 import styles from "./InputBar.module.css";
 
 type SubmitState = "idle" | "loading" | "success" | "error";
@@ -35,11 +36,14 @@ export default function InputBar() {
       setSubmitState("success");
       setValue("");
 
-      // After a brief success flash, reset and navigate home to show new tasks
+      // Tell every mounted task view to refetch. `router.refresh()` only
+      // re-runs server components, so it never showed the new tasks.
+      notifyTasksChanged();
+
+      // After a brief success flash, reset and land on Today
       setTimeout(() => {
         setSubmitState("idle");
         router.push("/");
-        router.refresh();
       }, 1500);
     } catch {
       setSubmitState("error");
@@ -122,6 +126,17 @@ export default function InputBar() {
           </span>
         </button>
       </form>
+
+      {/* The outcome only lived in the placeholder, which is not announced. */}
+      <p role="status" aria-live="polite" className={styles.srStatus}>
+        {isLoading
+          ? "Sending to Orbit"
+          : isSuccess
+          ? `Added ${addedCount} task${addedCount !== 1 ? "s" : ""} to Orbit`
+          : isError
+          ? "Something went wrong — try again"
+          : ""}
+      </p>
     </div>
   );
 }

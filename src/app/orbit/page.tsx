@@ -1,10 +1,12 @@
 "use client";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import ContextCard, { ContextItem } from "@/components/orbit/ContextCard";
 import MajorEventCard, { MajorEvent } from "@/components/orbit/MajorEventCard";
 import ContextInput from "@/components/orbit/ContextInput";
+import PixelDialog from "@/components/shared/PixelDialog";
 import OrbitPulse from "@/components/shared/OrbitPulse";
 import { useAuth } from "@/context/AuthContext";
+import { daysBetweenKeys, localDateKey } from "@/lib/time";
 import styles from "./page.module.css";
 
 type DbItem = {
@@ -29,7 +31,13 @@ const CATEGORY_COLOURS: Record<string, { color: string; bgColor: string }> = {
   "Major Event":{ color: "var(--orbit-gold)", bgColor: "var(--secondary-container)" },
 };
 
-function toContextItem(db: DbItem, onEdit: (id: string) => void, onDelete: (id: string) => void): ContextItem {
+type EditRequest = { id: string; content: string };
+
+function toContextItem(
+  db: DbItem,
+  onEdit: (req: EditRequest) => void,
+  onDelete: (id: string) => void
+): ContextItem {
   const colours = CATEGORY_COLOURS[db.category] ?? { color: "var(--secondary)", bgColor: "var(--secondary-container)" };
   return {
     id: db.id,
@@ -38,108 +46,108 @@ function toContextItem(db: DbItem, onEdit: (id: string) => void, onDelete: (id: 
     color: db.color ?? colours.color,
     bgColor: db.bg_color ?? colours.bgColor,
     tags: db.tags ?? [],
-    onEdit: () => onEdit(db.id),
+    onEdit: () => onEdit({ id: db.id, content: db.content }),
     onDelete: () => onDelete(db.id),
   };
 }
 
-function toMajorEvent(db: DbItem, onEdit: (id: string) => void): MajorEvent {
-  const eventDate = db.event_date ? new Date(db.event_date) : null;
-  const daysLeft = eventDate
-    ? Math.max(0, Math.ceil((eventDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
-    : 0;
+function toMajorEvent(
+  db: DbItem,
+  onEdit: (req: EditRequest) => void,
+  onDelete: (id: string) => void
+): MajorEvent {
   return {
     id: db.id,
     title: db.content,
     description: undefined,
-    daysLeft,
-    onEdit: () => onEdit(db.id),
+    // Whole calendar days in the viewer's zone — `event_date` is a date, so
+    // subtracting raw timestamps would be off by up to a day either way.
+    daysLeft: db.event_date
+      ? Math.max(0, daysBetweenKeys(localDateKey(), db.event_date))
+      : null,
+    onEdit: () => onEdit({ id: db.id, content: db.content }),
+    onDelete: () => onDelete(db.id),
   };
 }
 
 export default function OrbitPage() {
   const { user } = useAuth();
   const [contextItems, setContextItems] = useState<ContextItem[]>([]);
-  const [majorEvent, setMajorEvent] = useState<MajorEvent | null>(null);
+  const [majorEvents, setMajorEvents] = useState<MajorEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
   const [saving, setSaving] = useState(false);
-
-  const loadRef = useRef<() => Promise<void>>(async () => {});
-  const contextItemsRef = useRef<ContextItem[]>([]);
-  contextItemsRef.current = contextItems;
-
-  const handleEdit = useCallback((id: string) => {
-    const item = contextItemsRef.current.find((i) => i.id === id);
-    const newContent = window.prompt("Edit context directive:", item?.content ?? "");
-    if (!newContent?.trim() || newContent === item?.content) return;
-    fetch("/api/context", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, content: newContent.trim() }),
-    }).then(() => loadRef.current());
-  }, []);
-
-  const handleDelete = useCallback((id: string) => {
-    if (!window.confirm("Remove this context directive from Orbit?")) return;
-    fetch("/api/context", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
-    }).then(() => loadRef.current());
-  }, []);
+  const [editing, setEditing] = useState<EditRequest | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch("/api/context");
+      // A failed request used to render the same "no context" empty state as a
+      // genuinely empty account, which reads as data loss.
+      if (!res.ok) throw new Error(`context request failed: ${res.status}`);
       const json = await res.json();
       const items: DbItem[] = json.items ?? [];
 
-      const major = items.find((i) => i.is_major_event);
-      const regular = items.filter((i) => !i.is_major_event);
-
-      setMajorEvent(major ? toMajorEvent(major, handleEdit) : null);
-      setContextItems(regular.map((db) => toContextItem(db, handleEdit, handleDelete)));
+      setMajorEvents(
+        items.filter((i) => i.is_major_event).map((db) => toMajorEvent(db, setEditing, setDeletingId))
+      );
+      setContextItems(
+        items
+          .filter((i) => !i.is_major_event)
+          .map((db) => toContextItem(db, setEditing, setDeletingId))
+      );
+      setFailed(false);
+    } catch {
+      setFailed(true);
     } finally {
       setLoading(false);
     }
-  }, [handleEdit, handleDelete]);
-
-  useEffect(() => {
-    loadRef.current = load;
-  }, [load]);
+  }, []);
 
   useEffect(() => {
     load();
   }, [load, user]);
 
-  const handleAddContext = async (text: string) => {
+  const handleAddContext = async (text: string, eventDate?: string) => {
     setSaving(true);
     try {
-      // Intelligent category detection
-      let category = "General";
-      const lower = text.toLowerCase();
-      if (/gym|fitness|workout|run|swim|sport|exercise|lift/.test(lower)) category = "Fitness";
-      else if (/class|lecture|university|course|study|exam|assignment|homework/.test(lower)) category = "Academic";
-      else if (/work|project|deep|focus|productivity|deadline|client|code/.test(lower)) category = "Workstyle";
-      else if (/interest|hobby|watch|read|music|game|f1|race|movie/.test(lower)) category = "Interests";
-
-      const colours = CATEGORY_COLOURS[category] ?? CATEGORY_COLOURS["Workstyle"];
-
+      // The category is derived by /api/context; the browser used to run a
+      // second copy of those regexes.
       await fetch("/api/context", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          category,
-          content: text,
-          color: colours.color,
-          bg_color: colours.bgColor,
-        }),
+        body: JSON.stringify({ content: text, event_date: eventDate ?? null }),
       });
       await load();
     } finally {
       setSaving(false);
     }
+  };
+
+  const submitEdit = async (content: string) => {
+    const target = editing;
+    setEditing(null);
+    if (!target || content === target.content) return;
+    await fetch("/api/context", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: target.id, content }),
+    });
+    await load();
+  };
+
+  const submitDelete = async () => {
+    const id = deletingId;
+    setDeletingId(null);
+    if (!id) return;
+    await fetch("/api/context", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    await load();
   };
 
   return (
@@ -165,21 +173,38 @@ export default function OrbitPage() {
         </div>
       )}
 
+      {/* Load failure — distinct from an empty account */}
+      {!loading && failed && (
+        <div className={`pixel-border ${styles.emptyState}`} role="alert">
+          <div>
+            <p className="font-headline-md" style={{ color: "var(--error)", marginBottom: 4 }}>
+              Could not reach your context.
+            </p>
+            <p className="font-body-md" style={{ color: "var(--on-surface-variant)" }}>
+              Nothing has been lost — the request failed.
+            </p>
+          </div>
+          <button className="pixel-btn" onClick={load}>
+            Retry
+          </button>
+        </div>
+      )}
+
       {/* Bento Grid */}
-      {!loading && (
+      {!loading && !failed && (
         <div className={styles.bentoGrid}>
           {contextItems.map((item) => (
             <ContextCard key={item.id} item={item} />
           ))}
 
-          {/* Major Event — spans 2 columns on md+ */}
-          {majorEvent && (
-            <div className={styles.majorEventWrap}>
-              <MajorEventCard event={majorEvent} />
+          {/* Major Events — each spans 2 columns on md+ */}
+          {majorEvents.map((event) => (
+            <div key={event.id} className={styles.majorEventWrap}>
+              <MajorEventCard event={event} />
             </div>
-          )}
+          ))}
 
-          {contextItems.length === 0 && !majorEvent && (
+          {contextItems.length === 0 && majorEvents.length === 0 && (
             <div className={`pixel-border ${styles.emptyState}`}>
               <OrbitPulse size={14} gold />
               <div>
@@ -197,6 +222,25 @@ export default function OrbitPage() {
 
       {/* Add Context Terminal Input */}
       <ContextInput onSubmit={handleAddContext} loading={saving} />
+
+      <PixelDialog
+        open={editing !== null}
+        title="Edit context directive"
+        defaultValue={editing?.content ?? ""}
+        confirmLabel="Save"
+        onConfirm={submitEdit}
+        onCancel={() => setEditing(null)}
+      />
+
+      <PixelDialog
+        open={deletingId !== null}
+        title="Remove directive?"
+        message="Orbit will stop using this context when planning your day."
+        confirmLabel="Remove"
+        danger
+        onConfirm={submitDelete}
+        onCancel={() => setDeletingId(null)}
+      />
 
       {/* Decorative glow */}
       <div className={styles.bgGlow} aria-hidden="true" />

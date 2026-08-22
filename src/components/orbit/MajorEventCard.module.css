@@ -53,17 +53,28 @@
   letter-spacing: var(--ls-label-mono);
 }
 
-.editBtn {
+.cardActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  position: relative;
+  z-index: 1;
+}
+
+.iconBtn {
   color: var(--on-surface-variant);
   opacity: 0;
   transition: opacity 0.15s;
   background: none;
   border: none;
   cursor: pointer;
-  position: relative;
-  z-index: 1;
 }
-.card:hover .editBtn { opacity: 1; }
+/* Hover was the only way to reveal these, so they did not exist for a keyboard
+   user and — since touch has no hover — never appeared on a phone at all. */
+.card:hover .iconBtn,
+.iconBtn:focus-visible {
+  opacity: 1;
+}
 
 .bottom {
   display: flex;

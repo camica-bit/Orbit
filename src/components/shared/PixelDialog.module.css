@@ -1,0 +1,51 @@
+.dialog {
+  background-color: var(--surface-container);
+  color: var(--on-surface);
+  padding: 0;
+  border: none;
+  max-width: min(440px, calc(100vw - 32px));
+  width: 100%;
+  margin: auto;
+}
+
+.dialog::backdrop {
+  background-color: rgb(0 0 0 / 0.7);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px 24px;
+}
+
+.title {
+  color: var(--primary);
+  margin: 0;
+}
+
+.message {
+  color: var(--on-surface-variant);
+  margin: 0;
+  white-space: pre-line;
+}
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  background-color: var(--surface);
+  color: var(--on-surface);
+  font-family: var(--font-mono, monospace);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.dangerBtn {
+  background-color: var(--error);
+  color: var(--on-error, #fff);
+}

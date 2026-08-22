@@ -3,8 +3,10 @@
    "Analog-Future" — Premium Pixel-Art AI Life Planner
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Hanken+Grotesk:ital,wght@0,100..900;1,100..900&family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
+/* Fonts are loaded by `next/font` in `src/app/layout.tsx`, not by @import — a
+   CSS @import forces the browser to parse this file before it can even start
+   fetching the font CSS. Material Symbols is the one exception (icon font, not
+   in next/font's catalogue) and is a <link> in the same layout. */
 
 /* ---- Design Tokens ---- */
 :root {
@@ -76,10 +78,11 @@
   --parchment:                 #f5f5dc;
   --solar-gold:                #ffbf00;
 
-  /* Typography scale */
-  --font-headline: 'Space Grotesk', sans-serif;
-  --font-body:     'Hanken Grotesk', sans-serif;
-  --font-mono:     'JetBrains Mono', monospace;
+  /* Typography scale — families come from next/font (see app/layout.tsx), which
+     hashes the real family name and appends a metric-matched fallback. */
+  --font-headline: var(--font-space-grotesk), sans-serif;
+  --font-body:     var(--font-hanken-grotesk), sans-serif;
+  --font-mono:     var(--font-jetbrains-mono), monospace;
 
   --text-headline-xl:     48px;
   --lh-headline-xl:       56px;
@@ -106,7 +109,10 @@
   --container-max:    1200px;
 
   /* Nav */
-  --sidenav-width:    280px;
+  /* 280px was a silent deviation; implementation_plan.md:66 specifies 320px.
+     All three consumers (SideNav width, AppShell margin, InputBar left) read
+     this token, so the whole desktop offset moves together. */
+  --sidenav-width:    320px;
   --topbar-height:    64px;
   --bottomnav-height: 80px;
   --inputbar-height:  72px;

@@ -43,7 +43,28 @@ export interface UserMetadataInput {
   firstName?: string;
   lastName?: string;
   fullName?: string;
-  [key: string]: any;
+}
+
+/**
+ * Supabase `options.data` payload. This existed verbatim in both
+ * `signUpWithPassword` and `signInWithOtp`, so the two could drift apart.
+ */
+function buildMetadata(metadata?: UserMetadataInput): Record<string, string> | undefined {
+  const firstName = metadata?.firstName?.trim() || undefined;
+  const lastName = metadata?.lastName?.trim() || undefined;
+  const fullName =
+    metadata?.fullName?.trim() ||
+    [firstName, lastName].filter(Boolean).join(" ").trim() ||
+    undefined;
+
+  const payload: Record<string, string> = {};
+  if (firstName) payload.first_name = firstName;
+  if (lastName) payload.last_name = lastName;
+  if (fullName) {
+    payload.full_name = fullName;
+    payload.name = fullName;
+  }
+  return Object.keys(payload).length > 0 ? payload : undefined;
 }
 
 interface AuthContextType {
@@ -71,22 +92,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
+  // Was `createClient()` in the render body — a fresh client every render, then
+  // listed as an effect dependency, so the effect re-subscribed on every one.
+  const [supabase] = useState(createClient);
 
   useEffect(() => {
-    // Check initial active session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+    let reportedByListener = false;
+
+    // Subscribed first so the initial event isn't missed.
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, nextSession) => {
+      reportedByListener = true;
+      setSession(nextSession);
+      setUser(nextSession?.user ?? null);
       setLoading(false);
     });
 
-    // Listen for auth state changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
+    // `getUser()` validates the token with the server; `getSession()` only
+    // trusts whatever is sitting in local storage.
+    supabase.auth.getUser().then(({ data }) => {
+      if (reportedByListener) return;
+      setUser(data.user);
       setLoading(false);
     });
 
@@ -108,55 +135,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     password: string,
     metadata?: UserMetadataInput
   ) => {
-    const firstName = metadata?.firstName?.trim() || undefined;
-    const lastName = metadata?.lastName?.trim() || undefined;
-    const fullName =
-      metadata?.fullName?.trim() ||
-      [firstName, lastName].filter(Boolean).join(" ").trim() ||
-      undefined;
-
-    const dataPayload: Record<string, any> = {};
-    if (firstName) dataPayload.first_name = firstName;
-    if (lastName) dataPayload.last_name = lastName;
-    if (fullName) {
-      dataPayload.full_name = fullName;
-      dataPayload.name = fullName;
-    }
-
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: Object.keys(dataPayload).length > 0 ? dataPayload : undefined,
+        data: buildMetadata(metadata),
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });
     return { error: error as Error | null, user: data.user };
   };
 
-  const signInWithOtp = async (
-    email: string,
-    metadata?: UserMetadataInput
-  ) => {
-    const firstName = metadata?.firstName?.trim() || undefined;
-    const lastName = metadata?.lastName?.trim() || undefined;
-    const fullName =
-      metadata?.fullName?.trim() ||
-      [firstName, lastName].filter(Boolean).join(" ").trim() ||
-      undefined;
-
-    const dataPayload: Record<string, any> = {};
-    if (firstName) dataPayload.first_name = firstName;
-    if (lastName) dataPayload.last_name = lastName;
-    if (fullName) {
-      dataPayload.full_name = fullName;
-      dataPayload.name = fullName;
-    }
-
+  const signInWithOtp = async (email: string, metadata?: UserMetadataInput) => {
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        data: Object.keys(dataPayload).length > 0 ? dataPayload : undefined,
+        data: buildMetadata(metadata),
         emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     });

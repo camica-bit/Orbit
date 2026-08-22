@@ -4,27 +4,13 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import OrbitPulse from "@/components/shared/OrbitPulse";
 import { useAuth } from "@/context/AuthContext";
+import { NAV_ITEMS, isActiveHref } from "./navItems";
 import styles from "./SideNav.module.css";
 
-const NAV_ITEMS = [
-  { id: "today",    label: "Today's Focus",  icon: "auto_awesome",      href: "/" },
-  { id: "week",     label: "Weekly Flow",    icon: "insights",          href: "/week" },
-  { id: "orbit",    label: "Personal Orbit", icon: "hub",               href: "/orbit" },
-  { id: "calendar", label: "Calendar Sync",  icon: "sync",              href: "/calendar" },
-];
-
-interface SideNavProps {
-  activeNav: string;
-  onNavChange: (id: string) => void;
-}
-
-export default function SideNav({ activeNav, onNavChange }: SideNavProps) {
+export default function SideNav() {
   const pathname = usePathname();
   const router = useRouter();
   const { user, signOut, displayName } = useAuth();
-
-  const isActive = (href: string) =>
-    href === "/" ? pathname === "/" : pathname.startsWith(href);
 
   const handleSignOut = async () => {
     await signOut();
@@ -60,13 +46,14 @@ export default function SideNav({ activeNav, onNavChange }: SideNavProps) {
       {/* Nav Links */}
       <ul className={styles.navList}>
         {NAV_ITEMS.map((item) => {
-          const active = isActive(item.href);
+          const active = isActiveHref(pathname, item.href);
           return (
             <li key={item.id}>
               <Link
                 href={item.href}
                 className={`${styles.navItem} ${active ? styles.navItemActive : ""} font-label-mono`}
-                onClick={() => onNavChange(item.id)}
+                // BottomNav already announced the current page; desktop didn't.
+                aria-current={active ? "page" : undefined}
               >
                 <span
                   className="material-symbols-outlined"
@@ -98,17 +85,10 @@ export default function SideNav({ activeNav, onNavChange }: SideNavProps) {
 
         <div className="pixel-divider-h" style={{ marginBottom: 16, marginTop: user ? 12 : 0 }} />
 
-        <button className={`pixel-btn pixel-btn-primary ${styles.syncBtn}`}>
-          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>sync</span>
-          Sync Core
-        </button>
-
+        {/* "Sync Core" and "Support" lived here with no handler at all — a
+            primary-styled button that did nothing on click. Calendar sync is
+            reachable from the nav above; there is no support destination yet. */}
         <div className={styles.footerLinks}>
-          <button className={`${styles.footerLink} font-label-mono`}>
-            <span className="material-symbols-outlined" style={{ fontSize: 16 }}>help</span>
-            Support
-          </button>
-
           {user ? (
             <button
               id="sidenav-logout-btn"

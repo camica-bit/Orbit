@@ -9,7 +9,9 @@ export default function VoiceCore({ isListening, audioLevel = 0 }: VoiceCoreProp
   const scale = 1 + audioLevel * 0.15;
 
   return (
-    <div className={styles.container} aria-label="Voice visualization">
+    /* `aria-label` on a plain div is ignored by most assistive tech, and this is
+       pure decoration — the real label lives on the control that wraps it. */
+    <div className={styles.container} aria-hidden="true">
       {/* Outer ring — slow pulse */}
       <div className={`${styles.ring} ${styles.ringOuter} ${isListening ? styles.ringActive : ""}`} aria-hidden="true" />
       <div className={`${styles.ring} ${styles.ringMid}   ${isListening ? styles.ringActive : ""}`} aria-hidden="true" />

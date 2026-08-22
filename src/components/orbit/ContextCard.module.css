@@ -37,7 +37,10 @@
   padding: 2px;
 }
 
-.card:hover .editBtn {
+.card:hover .editBtn,
+/* Hover-only reveal meant edit and delete were unreachable by keyboard, and
+   invisible on touch, where there is no hover at all. */
+.editBtn:focus-visible {
   opacity: 1;
 }
 

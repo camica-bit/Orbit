@@ -5,9 +5,11 @@ export interface MajorEvent {
   id: string;
   title: string;
   description?: string;
-  daysLeft: number;
+  /** `null` when the event has no `event_date` yet. */
+  daysLeft: number | null;
   onView?: () => void;
   onEdit?: () => void;
+  onDelete?: () => void;
 }
 
 export default function MajorEventCard({ event }: { event: MajorEvent }) {
@@ -20,14 +22,26 @@ export default function MajorEventCard({ event }: { event: MajorEvent }) {
             Major Event
           </span>
           <span className={`${styles.countdown} font-label-mono`}>
-            T-Minus {event.daysLeft} Days
+            {/* A dateless event used to read "T-Minus 0 Days", i.e. today. */}
+            {event.daysLeft === null
+              ? "No date set"
+              : `T-Minus ${event.daysLeft} Days`}
           </span>
         </div>
-        {event.onEdit && (
-          <button className={styles.editBtn} onClick={event.onEdit} aria-label="Edit event">
-            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>edit</span>
-          </button>
-        )}
+        <div className={styles.cardActions}>
+          {event.onEdit && (
+            <button className={styles.iconBtn} onClick={event.onEdit} aria-label="Edit event">
+              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>edit</span>
+            </button>
+          )}
+          {/* Major events could be created and then never removed — the delete
+              path existed for ordinary context items only. */}
+          {event.onDelete && (
+            <button className={styles.iconBtn} onClick={event.onDelete} aria-label="Remove event">
+              <span className="material-symbols-outlined" style={{ fontSize: 18 }}>delete</span>
+            </button>
+          )}
+        </div>
       </div>
 
       <div className={styles.bottom}>

@@ -10,14 +10,9 @@ export default function Timeline({ events }: TimelineProps) {
     <section aria-label="Path ahead timeline">
       <div className={styles.header}>
         <h3 className={`${styles.title} font-headline-lg`}>The Path Ahead</h3>
-        <div className={styles.controls}>
-          <button className={`pixel-btn ${styles.arrowBtn}`} aria-label="Previous">
-            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>chevron_left</span>
-          </button>
-          <button className={`pixel-btn ${styles.arrowBtn}`} aria-label="Next">
-            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>chevron_right</span>
-          </button>
-        </div>
+        {/* The ‹ › arrows that used to sit here had `aria-label`s and no
+            handlers. There is nothing for them to page: `.cardGrid` is a fixed
+            3-column grid with no overflow and both views render every event. */}
       </div>
 
       {/* Desktop: card grid */}

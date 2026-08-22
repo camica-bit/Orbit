@@ -85,6 +85,12 @@
   min-height: 160px;
   transition: background-color 0.15s;
   cursor: pointer;
+  /* Reset the native <button> — day cards need button semantics (Space as
+     well as Enter) without button chrome. */
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  text-align: center;
 }
 .dayCard:hover { background-color: var(--surface-container-high); }
 
@@ -214,130 +220,52 @@
   text-decoration: line-through;
 }
 
-
-.headerRow {
+/* Week navigation */
+.weekNav {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 10px;
+  gap: 8px;
+  margin-left: auto;
 }
 
-.title { color: var(--primary); }
-
-.subtitle {
+.navBtn {
+  background: none;
+  border: none;
   color: var(--on-surface-variant);
-  max-width: 560px;
-}
-
-/* Week grid */
-.weekGrid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-  margin-bottom: 40px;
-}
-
-@media (max-width: 640px) {
-  .weekGrid { grid-template-columns: repeat(4, 1fr); }
-}
-
-.dayCard {
-  background-color: var(--surface-container);
-  padding: 12px 10px;
+  cursor: pointer;
+  padding: 2px;
   display: flex;
-  flex-direction: column;
+  transition: color 0.15s;
+}
+.navBtn:hover:not(:disabled) { color: var(--primary); }
+.navBtn:disabled { opacity: 0.3; cursor: default; }
+
+/* Bar colour legend */
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.legendItem {
+  display: flex;
   align-items: center;
-  gap: 8px;
-  min-height: 160px;
-  transition: background-color 0.15s;
-}
-.dayCard:hover { background-color: var(--surface-container-high); }
-
-.dayCardToday {
-  background-color: var(--secondary-container);
-  border-top-color: var(--secondary);
-  border-left-color: var(--secondary);
-}
-
-.dayLabel {
-  font-size: var(--text-label-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.todayBadge {
+  gap: 6px;
   font-size: 9px;
-  letter-spacing: 0.1em;
-  color: var(--on-secondary);
-  background-color: var(--secondary);
-  padding: 1px 5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--on-surface-variant);
 }
 
-.barWrap {
-  flex: 1;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  width: 100%;
-  min-height: 60px;
-}
-
-.bar {
+.legendSwatch {
   width: 8px;
-  min-height: 4px;
-  transition: height 0.3s ease;
+  height: 8px;
+  flex-shrink: 0;
 }
 
-.dayStats {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-}
-
-.statNum {
-  font-size: 20px;
-  line-height: 1;
-}
-
-.statLabel {
+.overflowMark {
   font-size: 9px;
-  color: var(--on-surface-variant);
-  text-transform: uppercase;
+  color: var(--error);
   letter-spacing: 0.06em;
-}
-
-.statHours {
-  font-size: 9px;
-  color: var(--outline);
-  letter-spacing: 0.06em;
-}
-
-.restDay {
-  font-size: 9px;
-  letter-spacing: 0.1em;
-  color: var(--outline);
-  opacity: 0.5;
-}
-
-/* Coming soon */
-.comingSoon {
-  background-color: var(--surface-container);
-  padding: 20px 24px;
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-}
-
-.csTitle {
-  color: var(--secondary);
-  font-size: var(--text-label-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  margin-bottom: 4px;
-}
-
-.csSub {
-  color: var(--on-surface-variant);
-  font-size: 14px;
 }

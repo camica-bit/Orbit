@@ -1,12 +1,7 @@
+import { formatDuration } from "@/lib/time";
 import styles from "./FocusActive.module.css";
 
 type SessionState = "active" | "paused";
-
-function formatTime(seconds: number) {
-  const m = Math.floor(seconds / 60).toString().padStart(2, "0");
-  const s = (seconds % 60).toString().padStart(2, "0");
-  return `${m}:${s}`;
-}
 
 interface Task { title: string; estimatedMins: number; }
 
@@ -24,6 +19,9 @@ export default function FocusActive({
   task, state, elapsed, progress, onPause, onResume, onComplete
 }: FocusActiveProps) {
   const isPaused = state === "paused";
+  // Past the estimate the session is in overtime, not "-3 min remaining".
+  const minsLeft = Math.max(0, task.estimatedMins - Math.floor(elapsed / 60));
+  const overtimeMins = Math.max(0, Math.floor(elapsed / 60) - task.estimatedMins);
 
   return (
     <div className={styles.wrap}>
@@ -56,7 +54,7 @@ export default function FocusActive({
         {/* Center content */}
         <div className={styles.timerCenter}>
           <span className={`${styles.elapsedTime} font-headline-xl`}>
-            {formatTime(elapsed)}
+            {formatDuration(elapsed)}
           </span>
           <span className={`${styles.taskName} font-label-mono`}>{task.title}</span>
           {isPaused && (
@@ -100,7 +98,8 @@ export default function FocusActive({
 
       {/* Progress label */}
       <p className={`${styles.progressLabel} font-label-mono`}>
-        {Math.round(progress)}% complete · {task.estimatedMins - Math.floor(elapsed / 60)} min remaining
+        {Math.round(progress)}% complete ·{" "}
+        {overtimeMins > 0 ? `${overtimeMins} min over estimate` : `${minsLeft} min remaining`}
       </p>
     </div>
   );

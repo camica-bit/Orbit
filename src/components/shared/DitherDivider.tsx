@@ -16,7 +16,9 @@ export default function DitherDivider({
     <div
       className={`${vertical ? "pixel-divider-v" : "pixel-divider-h"} ${styles.divider} ${className}`}
       style={style}
-      role="separator"
+      // Purely decorative dither texture: `aria-hidden` and `role="separator"`
+      // contradicted each other — one exposes the node, the other hides it.
+      // Nothing here separates content a screen reader needs announced.
       aria-hidden="true"
     />
   );

@@ -136,3 +136,28 @@
   0%   { background-position: 0 0, 2px 2px; }
   100% { background-position: 4px 4px, 6px 6px; }
 }
+
+/* ============================================================
+   Reduced motion
+   ============================================================
+   Roughly fifteen of the animations above loop forever — pulsing orbs, a
+   drifting starfield, blinking cursors, breathing rings — and six more are
+   declared in CSS modules (listen/page, AudioBars, TranscriptionBox,
+   VoiceCore). For a motion-sensitive user that is not a rough edge, it's an
+   unusable app, and `prefers-reduced-motion` appeared nowhere in the codebase.
+
+   Blanket-resetting every element is deliberate: enumerating the `.anim-*`
+   classes here would silently miss the module-scoped ones. Durations collapse
+   instead of being set to `none` so that `forwards` animations still land on
+   their end state — an entrance animation must not leave its element stuck at
+   `opacity: 0`. Nothing in the app relies on resting mid-animation. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

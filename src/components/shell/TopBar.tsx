@@ -1,26 +1,26 @@
 "use client";
+import { useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import PixelDialog from "@/components/shared/PixelDialog";
 import styles from "./TopBar.module.css";
 
 export default function TopBar() {
   const router = useRouter();
   const { user, signOut, displayName } = useAuth();
+  const [confirming, setConfirming] = useState(false);
 
-  const handleProfileClick = async () => {
-    if (user) {
-      const confirmLogout = window.confirm(
-        `Signed in as ${displayName} (${user.email}).\nLog out from Orbit?`
-      );
-      if (confirmLogout) {
-        await signOut();
-        router.push("/login");
-        router.refresh();
-      }
-    } else {
-      router.push("/login");
-    }
+  const handleProfileClick = () => {
+    if (user) setConfirming(true);
+    else router.push("/login");
+  };
+
+  const handleLogout = async () => {
+    setConfirming(false);
+    await signOut();
+    router.push("/login");
+    router.refresh();
   };
 
   return (
@@ -54,6 +54,16 @@ export default function TopBar() {
           account_circle
         </span>
       </button>
+
+      <PixelDialog
+        open={confirming}
+        title="Log out?"
+        message={user ? `Signed in as ${displayName} (${user.email}).` : ""}
+        confirmLabel="Log out"
+        danger
+        onConfirm={handleLogout}
+        onCancel={() => setConfirming(false)}
+      />
     </header>
   );
 }
